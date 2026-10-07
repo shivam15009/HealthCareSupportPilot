@@ -1,0 +1,77 @@
+HEALTHCARE SUPPORT PILOT - MILESTONE 1 EVALUATION
+
+Evaluation scope
+----------------
+This evaluation measures operational healthcare-support ticket classification and operational priority handling.
+It does not evaluate diagnosis, disease prediction, treatment recommendation, or personalized medical advice.
+
+Milestone 1 criteria
+--------------------
+1. Operational category classification accuracy: target >= 90%.
+2. Operational priority accuracy: target >= 85%.
+3. Uncertain/low-confidence cases should be eligible for human escalation.
+4. Submitted tickets should be stored and assigned a ticket ID.
+
+Test set
+--------
+100 synthetic operational healthcare-support tickets covering:
+- Patient Registration
+- Laboratory
+- Pharmacy
+- Billing
+- Appointment
+- Hospital Network
+- Staff Authentication
+- Equipment
+
+Results
+-------
+Category accuracy: 99.00% (99/100) -> PASS
+Priority accuracy: 94.00% (94/100) -> PASS
+Both category + priority correct: 94.00% (94/100)
+Average model confidence: 39.86%
+Escalation rate: 100.00% (100/100)
+
+Category breakdown
+------------------
+Appointment: 13/13 = 100.00%
+Billing: 13/13 = 100.00%
+Equipment: 9/9 = 100.00%
+Hospital Network: 13/13 = 100.00%
+Laboratory: 13/13 = 100.00%
+Patient Registration: 13/13 = 100.00%
+Pharmacy: 13/13 = 100.00%
+Staff Authentication: 12/13 = 92.31%
+
+Incorrect classification
+------------------------
+Ticket #81:
+Expected category: Staff Authentication
+Predicted category: Hospital Network
+Confidence: 23.02%
+
+Priority breakdown
+------------------
+P1: 23/27 = 85.19%
+P2: 38/40 = 95.00%
+P3: 33/33 = 100.00%
+
+Priority mismatches
+-------------------
+#26: expected P1, predicted P2, predicted category Laboratory
+#65: expected P1, predicted P3, predicted category Appointment
+#81: expected P2, predicted P1, predicted category Hospital Network
+#88: expected P2, predicted P1, predicted category Staff Authentication
+#89: expected P1, predicted P2, predicted category Staff Authentication
+#100: expected P1, predicted P2, predicted category Equipment
+
+Interpretation
+--------------
+The model exceeds the Milestone 1 classification target and the operational-priority target on this 100-ticket synthetic evaluation set.
+The evaluation also shows that the current low-confidence escalation threshold causes every test ticket to be escalated. This should be treated as a baseline safety/uncertainty result rather than an optimal workflow result.
+The priority mismatches show that the current broad-impact keyword rules and category defaults should be reviewed in a later refinement step.
+
+Important reporting language
+----------------------------
+Report the results as performance on a synthetic operational healthcare-support evaluation dataset.
+Do not describe these numbers as clinical accuracy or medical severity prediction.

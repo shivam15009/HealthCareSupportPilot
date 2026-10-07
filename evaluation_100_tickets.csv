@@ -1,0 +1,101 @@
+id,text,expected_category,expected_priority
+1,"The patient registration portal is unavailable at reception.",Patient Registration,P3
+2,"New patient intake screen will not load.",Patient Registration,P3
+3,"Staff cannot complete a new patient registration.",Patient Registration,P3
+4,"The registration workstation displays an error when creating a patient record.",Patient Registration,P3
+5,"Patient intake system is not responding.",Patient Registration,P3
+6,"Registration portal fails when entering patient details.",Patient Registration,P3
+7,"Reception cannot open the patient registration application.",Patient Registration,P3
+8,"The patient registration system is down for all departments.",Patient Registration,P1
+9,"Unable to register a patient because the intake application is unavailable.",Patient Registration,P3
+10,"The registration page keeps timing out.",Patient Registration,P3
+11,"New patient registration is failing at the front desk.",Patient Registration,P3
+12,"Patient registration software shows a server error.",Patient Registration,P3
+13,"The registration service is unavailable across the entire hospital.",Patient Registration,P1
+14,"The laboratory system is not displaying today's test results.",Laboratory,P2
+15,"Lab results are not appearing in the hospital portal.",Laboratory,P2
+16,"The laboratory application cannot be opened.",Laboratory,P2
+17,"Lab staff cannot access the results system.",Laboratory,P2
+18,"Today's laboratory results are missing from the portal.",Laboratory,P2
+19,"The lab system is showing an application error.",Laboratory,P2
+20,"Laboratory result synchronization has stopped.",Laboratory,P2
+21,"The laboratory portal is unavailable in the department.",Laboratory,P2
+22,"Lab reports are not loading in the support portal.",Laboratory,P2
+23,"The laboratory workstation cannot connect to the results application.",Laboratory,P2
+24,"The lab results system is down across multiple departments.",Laboratory,P1
+25,"Laboratory staff are unable to retrieve results from the system.",Laboratory,P2
+26,"The laboratory service is unavailable throughout the hospital.",Laboratory,P1
+27,"The pharmacy system is showing an application error.",Pharmacy,P2
+28,"Pharmacy staff cannot open the dispensing application.",Pharmacy,P2
+29,"The pharmacy software is not responding.",Pharmacy,P2
+30,"The pharmacy workstation cannot connect to the dispensing system.",Pharmacy,P2
+31,"The pharmacy application displays a server error.",Pharmacy,P2
+32,"Dispensing system is unavailable in the pharmacy department.",Pharmacy,P2
+33,"Pharmacy staff are unable to access the inventory application.",Pharmacy,P2
+34,"The pharmacy portal keeps timing out.",Pharmacy,P2
+35,"The dispensing application is failing to load.",Pharmacy,P2
+36,"Pharmacy system access has stopped working.",Pharmacy,P2
+37,"The pharmacy application is unavailable across multiple departments.",Pharmacy,P1
+38,"The pharmacy system cannot be reached from the workstation.",Pharmacy,P2
+39,"The pharmacy service is down for the entire hospital.",Pharmacy,P1
+40,"The hospital billing portal is unavailable.",Billing,P3
+41,"Billing staff cannot open the billing application.",Billing,P3
+42,"The insurance billing portal is not loading.",Billing,P3
+43,"The billing system shows an error when opening an account.",Billing,P3
+44,"Hospital billing software is not responding.",Billing,P3
+45,"The billing workstation cannot connect to the billing portal.",Billing,P3
+46,"Insurance processing screen is unavailable.",Billing,P3
+47,"The billing portal keeps timing out.",Billing,P3
+48,"Billing application fails when staff submit a charge.",Billing,P3
+49,"The hospital billing system is showing a server error.",Billing,P3
+50,"Billing system is unavailable across multiple departments.",Billing,P1
+51,"Staff cannot access the insurance billing application.",Billing,P3
+52,"The billing service is down for the entire hospital.",Billing,P1
+53,"The appointment booking system is not working.",Appointment,P3
+54,"Staff cannot open the appointment scheduling portal.",Appointment,P3
+55,"Patients cannot be scheduled because the booking system is unavailable.",Appointment,P3
+56,"The appointment application is showing an error.",Appointment,P3
+57,"Scheduling screen will not load.",Appointment,P3
+58,"The hospital appointment portal keeps timing out.",Appointment,P3
+59,"Staff are unable to create a new appointment in the system.",Appointment,P3
+60,"The scheduling application is not responding.",Appointment,P3
+61,"Appointment booking is failing at the front desk.",Appointment,P3
+62,"The appointment system cannot connect to the scheduling service.",Appointment,P3
+63,"The scheduling system is down across multiple departments.",Appointment,P1
+64,"Appointment portal is unavailable for staff.",Appointment,P3
+65,"The appointment booking service is unavailable throughout the hospital.",Appointment,P1
+66,"The hospital network is offline in the ward.",Hospital Network,P1
+67,"Network connectivity has been lost in the hospital ward.",Hospital Network,P1
+68,"The hospital network is unavailable for staff workstations.",Hospital Network,P1
+69,"Multiple departments cannot connect to the hospital network.",Hospital Network,P1
+70,"The internal hospital network is down.",Hospital Network,P1
+71,"Workstations have lost network connectivity across the hospital.",Hospital Network,P1
+72,"The ward network connection is not working.",Hospital Network,P1
+73,"Hospital network access is unavailable in several departments.",Hospital Network,P1
+74,"The network service is not responding in the hospital.",Hospital Network,P1
+75,"Staff cannot access internal systems because the hospital network is down.",Hospital Network,P1
+76,"The hospital-wide network is unavailable.",Hospital Network,P1
+77,"Network connectivity has failed across all departments.",Hospital Network,P1
+78,"The entire hospital has lost network access.",Hospital Network,P1
+79,"Staff cannot log into the hospital workstation.",Staff Authentication,P2
+80,"The staff login portal is rejecting valid credentials.",Staff Authentication,P2
+81,"Hospital employees cannot access their workstation accounts.",Staff Authentication,P2
+82,"The staff authentication system is unavailable.",Staff Authentication,P2
+83,"Employees are unable to sign in to the hospital system.",Staff Authentication,P2
+84,"The staff login application is showing an error.",Staff Authentication,P2
+85,"Hospital workstation authentication is failing.",Staff Authentication,P2
+86,"Staff cannot access the internal application because login is failing.",Staff Authentication,P2
+87,"The employee sign-in portal is not responding.",Staff Authentication,P2
+88,"Multiple departments cannot authenticate staff accounts.",Staff Authentication,P2
+89,"The staff authentication service is unavailable across the hospital.",Staff Authentication,P1
+90,"Employee login is failing on hospital workstations.",Staff Authentication,P2
+91,"Staff sign-in is unavailable throughout the entire hospital.",Staff Authentication,P1
+92,"The barcode printer is offline.",Equipment,P2
+93,"The department printer is not responding.",Equipment,P2
+94,"A workstation scanner is not working.",Equipment,P2
+95,"The label printer shows an error.",Equipment,P2
+96,"The barcode scanner cannot connect to the workstation.",Equipment,P2
+97,"The equipment device is not powering on.",Equipment,P2
+98,"A hospital printer has stopped working.",Equipment,P2
+99,"Several equipment devices are unavailable across multiple departments.",Equipment,P1
+100,"The equipment support devices are offline throughout the hospital.",Equipment,P1
