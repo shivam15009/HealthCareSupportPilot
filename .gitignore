@@ -1,0 +1,25 @@
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# SQLite runtime database
+*.db
+*.sqlite
+*.sqlite3
+
+# Evaluation/runtime outputs
+evaluation_100_results.csv
+evaluation_100_tickets.csv
+milestone1_evaluation.txt
+
+# IDE/editor files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db

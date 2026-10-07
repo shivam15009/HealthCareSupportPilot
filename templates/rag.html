@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Support Pilot | AI Resolution</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tickets.css') }}">
+
+    <style>
+        .rag-info-banner{border:1px solid #d9e5ee;background:#f7fbfd;border-radius:14px;padding:20px 22px;display:flex;gap:16px;align-items:flex-start;margin-bottom:24px}
+        .rag-info-icon{width:44px;height:44px;min-width:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#e8f4f8;color:#17758b}
+        .rag-info-banner h4{margin:0 0 5px;font-size:16px;font-weight:700}.rag-info-banner p{margin:0;color:#667786;font-size:13px;line-height:1.6}
+        .rag-workflow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+        .rag-step{border:1px solid #e2e9ee;border-radius:13px;padding:18px;background:#fff}
+        .rag-step-number{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#edf5f8;color:#17758b;font-size:12px;font-weight:700;margin-bottom:12px}
+        .rag-step-title{font-size:13px;font-weight:700;margin-bottom:6px;color:#233746}.rag-step-text{font-size:12px;line-height:1.5;color:#71808c}
+        .main-card{background:#fff;border:1px solid #e2e9ee;border-radius:14px;overflow:hidden}
+        .card-header-custom{padding:20px 22px;border-bottom:1px solid #e5ebef}.card-header-custom h2{font-size:17px;font-weight:700;color:#233746;margin:0 0 6px}.card-header-custom p{font-size:13px;color:#71808c;margin:0}
+        .card-body-custom{padding:22px}.rag-section{margin-top:28px}.rag-section-title{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:700;margin-bottom:14px;color:#233746}.rag-section-title i{color:#17758b}
+        .ticket-detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.ticket-detail-item{border:1px solid #e2e9ee;background:#fff;border-radius:11px;padding:15px}.ticket-detail-item.full-width{grid-column:1/-1}
+        .ticket-detail-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#7b8993;margin-bottom:6px}.ticket-detail-value{font-size:14px;font-weight:700;color:#263b49;word-break:break-word}.ticket-description{font-size:13px;font-weight:400;line-height:1.7;color:#435661;white-space:pre-wrap}
+        .status-badge,.priority-badge,.type-badge,.relevance-badge{display:inline-block;padding:5px 9px;border-radius:20px;font-size:10px;font-weight:700}.status-badge{background:#edf7f4;color:#26735f}.priority-badge,.type-badge{background:#f0f4f7;color:#60717c}.relevance-badge{background:#edf7f4;color:#26735f}
+        .evidence-card{border:1px solid #e2e9ee;border-radius:13px;padding:18px;background:#fff;margin-bottom:12px}.evidence-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}.evidence-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#17758b}.evidence-number{width:28px;height:28px;border-radius:8px;background:#123d70;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex:0 0 28px}.evidence-card h5{font-size:14px;font-weight:700;margin:0;color:#263b49}.evidence-card p{font-size:13px;line-height:1.6;color:#647582;margin:12px 0}.evidence-meta{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 12px}
+        .source-link{font-size:12px;color:#17758b;text-decoration:none;word-break:break-all}.source-link:hover{text-decoration:underline}
+        .context-container{background:#f7fafc;border:1px solid #e2e9ee;border-radius:11px;padding:16px;font-size:12px;line-height:1.65;color:#52636f;white-space:pre-wrap;max-height:420px;overflow:auto}
+        .resolution-container{border:1px solid #dfe8ed;border-radius:13px;background:#fbfdfe;padding:20px}
+        .resolution-block{margin-bottom:20px}.resolution-block:last-child{margin-bottom:0}.resolution-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:#17758b;margin-bottom:8px}.resolution-summary,.resolution-area{font-size:14px;line-height:1.7;color:#334955}
+        .resolution-steps{margin:0;padding-left:22px}.resolution-steps li{font-size:13px;line-height:1.7;color:#435661;margin-bottom:8px}.source-item{padding:10px 0;border-bottom:1px solid #e8eef1}.source-item:last-child{border-bottom:0}.source-title{font-size:13px;font-weight:700;color:#263b49}.source-meta{font-size:11px;color:#71808c;margin-top:3px}
+        .loading-box{display:flex;align-items:center;gap:10px;padding:18px;color:#71808c;font-size:13px}.rag-error{border:1px solid #ead6d6;background:#fff7f7;border-radius:11px;padding:16px;color:#8b4b4b;font-size:13px}
+        .empty-evidence{border:1px dashed #d8e2e7;border-radius:12px;padding:20px;text-align:center;color:#71808c;font-size:13px}
+        .workflow-complete .rag-step-number{background:#edf7f4;color:#26735f}
+        @media(max-width:900px){.rag-workflow{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.rag-workflow,.ticket-detail-grid{grid-template-columns:1fr}.ticket-detail-item.full-width{grid-column:auto}}
+    </style>
+</head>
+
+<body>
+
+<div class="app-shell">
+
+    <aside class="sidebar">
+
+    <!-- LOGO -->
+
+    <div class="sidebar-brand">
+
+        <a
+            href="/dashboard"
+            class="brand-link"
+        >
+
+            <div class="brand-logo">
+
+                <img
+                    src="{{ url_for(
+                        'static',
+                        filename='images/healthcare-support-pilot.png'
+                    ) }}"
+                    alt="Healthcare Support Pilot"
+                >
+
+            </div>
+
+            <div class="brand-text">
+
+                <div class="brand-title">
+                    HEALTHCARE
+                </div>
+
+                <div class="brand-title">
+                    SUPPORTPILOT
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <div class="sidebar-divider"></div>
+
+
+    <!-- WORKSPACE -->
+
+    <div class="nav-section">
+
+        <div class="nav-label">
+            WORKSPACE
+        </div>
+
+
+        <!-- DASHBOARD -->
+
+        <a
+            href="/dashboard"
+            class="sidebar-link"
+        >
+
+            <i class="fa-solid fa-chart-line"></i>
+
+            <span>
+                Dashboard
+            </span>
+
+        </a>
+
+
+        <!-- TICKETS -->
+
+        <a
+            href="/ticket"
+            class="sidebar-link active"
+        >
+
+            <i class="fa-solid fa-ticket"></i>
+
+            <span>
+                Tickets
+            </span>
+
+        </a>
+
+
+        <!-- MILESTONE 2 -->
+
+        <a
+            href="/rag"
+            class="sidebar-link"
+        >
+
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+
+            <span>
+                AI Agents
+            </span>
+
+        </a>
+
+
+        <!-- ANALYTICS -->
+
+        <a
+            href="/analytics"
+            class="sidebar-link"
+        >
+
+            <i class="fa-solid fa-chart-simple"></i>
+
+            <span>
+                Analytics
+            </span>
+
+        </a>
+
+
+        <!-- INTEGRATIONS -->
+
+        <a
+            href="/integrations"
+            class="sidebar-link"
+        >
+
+            <i class="fa-solid fa-plug"></i>
+
+            <span>
+                Integrations
+            </span>
+
+        </a>
+
+    </div>
+
+
+    <!-- SIDEBAR BOTTOM -->
+
+    <div class="sidebar-bottom">
+
+        <a
+            href="/settings"
+            class="sidebar-link"
+        >
+
+            <i class="fa-solid fa-gear"></i>
+
+            <span>
+                Settings
+            </span>
+
+        </a>
+
+
+        <a
+            href="#"
+            class="sidebar-link"
+            onclick="logout(); return false;"
+        >
+
+            <i class="fa-solid fa-right-from-bracket"></i>
+
+            <span>
+                Logout
+            </span>
+
+        </a>
+
+    </div>
+
+</aside>
+
+    <main class="main-content">
+
+        <div class="page-header">
+            <div>
+                <h1>AI Operational Resolution</h1>
+                <p>Knowledge-grounded troubleshooting for healthcare operational support tickets.</p>
+            </div>
+        </div>
+
+        <div id="pageError"></div>
+
+        <section class="rag-info-banner">
+            <div class="rag-info-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <div>
+                <h4>Operational support only</h4>
+                <p>This workflow retrieves technical and operational knowledge-base evidence. It does not provide diagnosis, treatment, medication, or personalized medical advice.</p>
+            </div>
+        </section>
+
+        <section class="rag-workflow" id="workflowContainer">
+            <div class="rag-step" id="workflow1">
+                <div class="rag-step-number">1</div>
+                <div class="rag-step-title">Ticket Analysis</div>
+                <div class="rag-step-text">Load the selected ticket and its predicted operational category.</div>
+            </div>
+            <div class="rag-step" id="workflow2">
+                <div class="rag-step-number">2</div>
+                <div class="rag-step-title">Knowledge Retrieval</div>
+                <div class="rag-step-text">Search the enterprise knowledge base for relevant evidence.</div>
+            </div>
+            <div class="rag-step" id="workflow3">
+                <div class="rag-step-number">3</div>
+                <div class="rag-step-title">Context Augmentation</div>
+                <div class="rag-step-text">Combine the ticket with retrieved evidence and source details.</div>
+            </div>
+            <div class="rag-step" id="workflow4">
+                <div class="rag-step-number">4</div>
+                <div class="rag-step-title">Resolution Generation</div>
+                <div class="rag-step-text">Produce a structured, evidence-grounded operational response.</div>
+            </div>
+        </section>
+
+        <section class="main-card">
+            <div class="card-header-custom">
+                <h2>Selected Support Ticket</h2>
+                <p>The ticket below is used as the input to the Milestone 2 RAG workflow.</p>
+            </div>
+
+            <div class="card-body-custom">
+
+                <div class="ticket-detail-grid">
+                    <div class="ticket-detail-item">
+                        <div class="ticket-detail-label">Ticket ID</div>
+                        <div class="ticket-detail-value" id="ticketIdContainer">—</div>
+                    </div>
+                    <div class="ticket-detail-item">
+                        <div class="ticket-detail-label">Status</div>
+                        <div class="ticket-detail-value" id="statusContainer">—</div>
+                    </div>
+                    <div class="ticket-detail-item">
+                        <div class="ticket-detail-label">Requester</div>
+                        <div class="ticket-detail-value" id="requesterContainer">—</div>
+                    </div>
+                    <div class="ticket-detail-item">
+                        <div class="ticket-detail-label">Domain</div>
+                        <div class="ticket-detail-value" id="departmentContainer">—</div>
+                    </div>
+                    <div class="ticket-detail-item">
+                        <div class="ticket-detail-label">Category</div>
+                        <div class="ticket-detail-value" id="categoryContainer">—</div>
+                    </div>
+                    <div class="ticket-detail-item">
+                        <div class="ticket-detail-label">Severity</div>
+                        <div class="ticket-detail-value" id="severityContainer">—</div>
+                    </div>
+                    <div class="ticket-detail-item">
+                        <div class="ticket-detail-label">Priority</div>
+                        <div class="ticket-detail-value" id="priorityContainer">—</div>
+                    </div>
+                    <div class="ticket-detail-item">
+                        <div class="ticket-detail-label">Classification Confidence</div>
+                        <div class="ticket-detail-value" id="confidenceContainer">—</div>
+                    </div>
+                    <div class="ticket-detail-item full-width">
+                        <div class="ticket-detail-label">Title</div>
+                        <div class="ticket-detail-value" id="titleContainer">—</div>
+                    </div>
+                    <div class="ticket-detail-item full-width">
+                        <div class="ticket-detail-label">Description</div>
+                        <div class="ticket-description" id="descriptionContainer">—</div>
+                    </div>
+                </div>
+
+                <section class="rag-section">
+                    <div class="rag-section-title">
+                        <i class="fa-solid fa-book-open"></i>
+                        Top Knowledge-Base Evidence
+                    </div>
+                    <div id="evidenceContainer">
+                        <div class="loading-box"><i class="fa-solid fa-spinner fa-spin"></i> Waiting for ticket...</div>
+                    </div>
+                </section>
+
+                <section class="rag-section">
+                    <div class="rag-section-title">
+                        <i class="fa-solid fa-layer-group"></i>
+                        Context Augmentation
+                    </div>
+                    <pre id="contextContainer" class="context-container">Waiting for retrieved knowledge...</pre>
+                </section>
+
+                <section class="rag-section">
+                    <div class="rag-section-title">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        AI Operational Resolution
+                    </div>
+                    <div id="resolutionContainer" class="resolution-container">
+                        <div class="loading-box"><i class="fa-solid fa-spinner fa-spin"></i> Waiting for RAG processing...</div>
+                    </div>
+                </section>
+
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", loadSelectedTicket);
+
+async function loadSelectedTicket() {
+    const params = new URLSearchParams(window.location.search);
+    const ticketId = params.get("ticket_id");
+
+    if (!ticketId) {
+        showPageError("No ticket was selected. Please submit a ticket first and click Open AI Resolution.");
+        return;
+    }
+
+    if (!/^\d+$/.test(ticketId)) {
+        showPageError("The selected ticket ID is invalid.");
+        return;
+    }
+
+    try {
+        setWorkflow(1);
+
+        const response = await fetch("/api/ticket/" + encodeURIComponent(ticketId));
+        const data = await readJson(response);
+
+        if (!response.ok) {
+            throw new Error(data.error || "Unable to load the selected ticket.");
+        }
+
+        displayTicket(data);
+        setWorkflow(2);
+
+        await runRag(ticketId);
+    } catch (error) {
+        console.error("Ticket loading error:", error);
+        showPageError(error.message || "Unable to load the selected ticket.");
+    }
+}
+
+async function runRag(ticketId) {
+    const evidenceContainer = document.getElementById("evidenceContainer");
+    const contextContainer = document.getElementById("contextContainer");
+    const resolutionContainer = document.getElementById("resolutionContainer");
+
+    evidenceContainer.innerHTML =
+        '<div class="loading-box"><i class="fa-solid fa-spinner fa-spin"></i> Searching knowledge base...</div>';
+    contextContainer.textContent = "Building augmented context...";
+    resolutionContainer.innerHTML =
+        '<div class="loading-box"><i class="fa-solid fa-spinner fa-spin"></i> Generating operational resolution...</div>';
+
+    try {
+        const response = await fetch("/api/rag", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ticket_id: ticketId})
+        });
+
+        const data = await readJson(response);
+
+        if (!response.ok) {
+            throw new Error(data.error || "RAG processing failed.");
+        }
+
+        updateTicketFromRag(data);
+        renderEvidence(data.evidence || []);
+
+        setWorkflow(3);
+        contextContainer.textContent =
+            data.context || "No augmented context was generated.";
+
+        setWorkflow(4);
+        renderResolution(data.resolution, data.category);
+
+        document.getElementById("workflowContainer").classList.add("workflow-complete");
+    } catch (error) {
+        console.error("RAG processing error:", error);
+
+        evidenceContainer.innerHTML =
+            '<div class="rag-error"><strong>Knowledge retrieval failed</strong><div class="mt-2">' +
+            escapeHtml(error.message) + '</div></div>';
+
+        contextContainer.textContent = "Unable to generate augmented context.";
+
+        resolutionContainer.innerHTML =
+            '<div class="rag-error"><strong>Resolution generation failed</strong><div class="mt-2">' +
+            escapeHtml(error.message) + '</div></div>';
+    }
+}
+
+async function readJson(response) {
+    try {
+        return await response.json();
+    } catch (error) {
+        throw new Error("The server returned an invalid response.");
+    }
+}
+
+function displayTicket(data) {
+    setText("ticketIdContainer", data.ticket_id);
+    setText("requesterContainer", data.requester_name || "Not provided");
+    setText("departmentContainer", data.department || "Not provided");
+    setText("titleContainer", data.title || "Untitled support ticket");
+    setText("descriptionContainer", data.description || "");
+    setText("categoryContainer", data.category || "Unknown");
+    setText("severityContainer", data.severity || "—");
+    setText("confidenceContainer", formatPercent(data.confidence));
+
+    if (data.status) {
+        document.getElementById("statusContainer").innerHTML =
+            '<span class="status-badge">' + escapeHtml(data.status) + '</span>';
+    }
+
+    if (data.priority) {
+        document.getElementById("priorityContainer").innerHTML =
+            '<span class="priority-badge">' + escapeHtml(data.priority) + '</span>';
+    }
+}
+
+function updateTicketFromRag(data) {
+    if (data.category) setText("categoryContainer", data.category);
+    if (data.severity) setText("severityContainer", data.severity);
+    if (data.confidence !== undefined && data.confidence !== null) {
+        setText("confidenceContainer", formatPercent(data.confidence));
+    }
+}
+
+function renderEvidence(evidence) {
+    const container = document.getElementById("evidenceContainer");
+
+    if (!Array.isArray(evidence) || evidence.length === 0) {
+        container.innerHTML =
+            '<div class="empty-evidence">No sufficiently relevant knowledge-base evidence was found for this ticket.</div>';
+        return;
+    }
+
+    container.innerHTML = evidence.slice(0, 3).map((item, index) => {
+        const resolution = formatResolutionForDisplay(item.resolution);
+        const score = Number(item.score || 0);
+        const sourceUrl = item.source_url || "";
+
+        return `
+            <article class="evidence-card">
+                <div class="evidence-header"><span class="evidence-label">Evidence</span><span class="evidence-number">${index + 1}</span></div>
+                <h5>${escapeHtml(item.title || "Knowledge-base entry")}</h5>
+
+                <div class="evidence-meta">
+                    <span class="type-badge">${escapeHtml(item.category || "Unknown")}</span>
+                    <span class="type-badge">${escapeHtml(item.kb_type || "KB")}</span>
+                    <span class="relevance-badge">${(score * 100).toFixed(1)}% relevance</span>
+                </div>
+
+                <p><strong>Issue:</strong> ${escapeHtml(item.issue || "Not specified")}</p>
+                <p><strong>Resolution:</strong> ${escapeHtml(resolution || "No resolution steps provided.")}</p>
+
+                <div class="source-item">
+                    <div class="source-title">${escapeHtml(item.source_title || "Knowledge source")}</div>
+                    ${sourceUrl
+                        ? `<a class="source-link" href="${escapeAttribute(sourceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(sourceUrl)}</a>`
+                        : '<div class="source-meta">Source URL not provided.</div>'}
+                </div>
+            </article>
+        `;
+    }).join("");
+}
+
+function renderResolution(resolution, category) {
+    const container = document.getElementById("resolutionContainer");
+    const noEvidenceMessage =
+        "No sufficiently relevant knowledge-base evidence was found for this ticket.";
+
+    if (!resolution || !resolution.trim()) {
+        container.innerHTML =
+            '<div class="empty-evidence">' + noEvidenceMessage + '</div>';
+        return;
+    }
+
+    if (resolution.trim() === noEvidenceMessage) {
+        container.innerHTML =
+            '<div class="empty-evidence">' + noEvidenceMessage + '</div>';
+        return;
+    }
+
+    const parsed = parseStructuredResolution(resolution, category);
+
+    container.innerHTML = `
+        <div class="resolution-block">
+            <div class="resolution-label">Issue Summary</div>
+            <div class="resolution-summary">${escapeHtml(parsed.issueSummary)}</div>
+        </div>
+
+        <div class="resolution-block">
+            <div class="resolution-label">Operational Area</div>
+            <div class="resolution-area">${escapeHtml(parsed.operationalArea)}</div>
+        </div>
+
+        <div class="resolution-block">
+            <div class="resolution-label">Recommended Troubleshooting Steps</div>
+            <ol class="resolution-steps">
+                ${parsed.steps.map(step => `<li>${escapeHtml(step)}</li>`).join("")}
+            </ol>
+        </div>
+
+        <div class="resolution-block">
+            <div class="resolution-label">Knowledge Sources</div>
+            <div>
+                ${parsed.sources.length
+                    ? parsed.sources.map(source => `
+                        <div class="source-item">
+                            <div class="source-title">${escapeHtml(source.title)}</div>
+                            ${source.url
+                                ? `<a class="source-link" href="${escapeAttribute(source.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(source.url)}</a>`
+                                : ""}
+                        </div>
+                    `).join("")
+                    : '<div class="source-meta">See the evidence cards above for retrieved source details.</div>'}
+            </div>
+        </div>
+    `;
+}
+
+function parseStructuredResolution(text, fallbackCategory) {
+    const sections = {
+        issue: "",
+        area: fallbackCategory || "Unknown",
+        steps: [],
+        sources: []
+    };
+
+    let current = "";
+
+    text.split(/\r?\n/).forEach(raw => {
+        const line = raw.trim();
+        if (!line) return;
+
+        const normalized = line.toLowerCase();
+
+        if (normalized === "issue summary" || normalized === "issue summary:") {
+            current = "issue";
+            return;
+        }
+        if (normalized === "operational area" || normalized === "operational area:") {
+            current = "area";
+            return;
+        }
+        if (normalized === "recommended troubleshooting steps" || normalized === "recommended troubleshooting steps:") {
+            current = "steps";
+            return;
+        }
+        if (normalized === "knowledge sources" || normalized === "knowledge sources:") {
+            current = "sources";
+            return;
+        }
+
+        if (current === "issue") {
+            sections.issue += (sections.issue ? " " : "") + line;
+        } else if (current === "area") {
+            sections.area = line;
+        } else if (current === "steps") {
+            const step = line.replace(/^\s*(?:[-•*]|\d+[.)])\s*/, "").trim();
+            if (step) sections.steps.push(step);
+        } else if (current === "sources") {
+            const urlMatch = line.match(/https?:\/\/\S+/);
+            const url = urlMatch ? urlMatch[0].replace(/[),.;]+$/, "") : "";
+            const title = url ? line.replace(urlMatch[0], "").replace(/[-:]\s*$/, "").trim() : line;
+            sections.sources.push({title: title || "Knowledge source", url});
+        }
+    });
+
+    if (!sections.issue) {
+        sections.issue = "Operational issue identified from the selected support ticket.";
+    }
+    if (!sections.steps.length) {
+        sections.steps = ["Review the retrieved knowledge-base evidence and apply the listed operational checks."];
+    }
+
+    return sections;
+}
+
+function formatResolutionForDisplay(value) {
+    if (Array.isArray(value)) return value.join(" ");
+    return String(value || "");
+}
+
+function formatPercent(value) {
+    const number = Number(value);
+    return Number.isFinite(number) ? number.toFixed(2) + "%" : "—";
+}
+
+function setWorkflow(activeStep) {
+    for (let i = 1; i <= 4; i++) {
+        const el = document.getElementById("workflow" + i);
+        if (!el) continue;
+
+        el.style.opacity = i <= activeStep ? "1" : "0.72";
+        if (i < activeStep) el.classList.add("workflow-complete");
+    }
+}
+
+function setText(id, value) {
+    const element = document.getElementById(id);
+    if (element) element.textContent = value == null ? "—" : String(value);
+}
+
+function showPageError(message) {
+    const pageError = document.getElementById("pageError");
+    pageError.innerHTML =
+        '<div class="rag-error mb-4"><strong>Unable to load AI Resolution</strong><div class="mt-2">' +
+        escapeHtml(message) + '</div></div>';
+}
+
+function escapeHtml(value) {
+    return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function escapeAttribute(value) {
+    return escapeHtml(value).replace(/`/g, "&#096;");
+}
+</script>
+
+</body>
+</html>
