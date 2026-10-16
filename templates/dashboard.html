@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -49,21 +49,39 @@
                 <i class="fa-solid fa-ticket"></i><span>Tickets</span>
             </a>
             <a href="/rag" class="sidebar-link">
-                <i class="fa-solid fa-wand-magic-sparkles"></i><span>AI Agents</span>
-            </a>
+    <i class="fa-solid fa-book-open"></i><span>RAG Workspace</span>
+</a>
+<a href="/agents" class="sidebar-link">
+    <i class="fa-solid fa-robot"></i><span>AI Agents</span>
+</a>
             <button class="sidebar-link dashboard-tab-link {{ 'active' if active_tab == 'analytics' else '' }}" type="button" role="tab"
                     data-bs-toggle="pill" data-bs-target="#analytics-tab" aria-controls="analytics-tab"
                     aria-selected="{{ 'true' if active_tab == 'analytics' else 'false' }}">
                 <i class="fa-solid fa-chart-simple"></i><span>Analytics</span>
             </button>
+
+        </div>
+
+        <!-- SIDEBAR BOTTOM -->
+        <div class="sidebar-bottom">
+            <a href="/settings" class="sidebar-link">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </a>
+
+            <a href="#" class="sidebar-link" onclick="logout(); return false;">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Logout</span>
+            </a>
         </div>
     </aside>
 
     <main class="main">
+
         <header class="topbar">
             <div>
                 <h1 class="page-title">Support Dashboard</h1>
-                <div class="page-subtitle">Healthcare Support Pilot · Live ticket metrics</div>
+                <div class="page-subtitle">Healthcare Support Pilot Â· Live ticket metrics</div>
             </div>
             <div class="system-status"><span class="status-dot"></span>System Online</div>
         </header>
@@ -188,6 +206,12 @@
         data: { labels: priorityLabels, datasets: [{ label: "Tickets", data: priorityValues, backgroundColor: "#365f9d" }] },
         options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
     }));
+
+    function logout() {
+        alert("Logout functionality will be connected when authentication is implemented.");
+    }
 </script>
 </body>
 </html>
+
+

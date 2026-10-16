@@ -38,6 +38,24 @@ def clean_text(value):
     return " ".join(text.split()) if text else ""
 
 
+def normalize_source_url(value):
+    """Extract a plain URL when the source is stored as a Markdown link."""
+    url = clean_text(value)
+
+    if url.startswith("[") and "](" in url and url.endswith(")"):
+        link_end = url.find("](")
+        candidate = url[link_end + 2:-1].strip()
+
+        if (
+            candidate.lower().startswith(("https://", "http://"))
+            and not any(char.isspace() for char in candidate)
+            and ")" not in candidate
+        ):
+            return candidate
+
+    return url
+
+
 def build_context(ticket_text, evidence):
     """
     Build context for the resolution stage.
@@ -76,7 +94,7 @@ def build_context(ticket_text, evidence):
                 f"Issue: {clean_text(item.get('issue', ''))}",
                 f"Resolution: {clean_text(resolution)}",
                 f"Source: {clean_text(item.get('source_title', ''))}",
-                f"Source URL: {clean_text(item.get('source_url', ''))}",
+                f"Source URL: {normalize_source_url(item.get('source_url', ''))}",
             ]
         )
 
@@ -273,7 +291,7 @@ def generate_resolution(ticket_text, evidence, category=None):
 
     for index, item in enumerate(valid_evidence, start=1):
         source_title = clean_text(item.get("source_title", ""))
-        source_url = clean_text(item.get("source_url", ""))
+        source_url = normalize_source_url(item.get("source_url", ""))
         kb_title = clean_text(item.get("title", ""))
 
         if not source_title:
@@ -282,7 +300,7 @@ def generate_resolution(ticket_text, evidence, category=None):
         source_line = f"{index}. {source_title}"
 
         if kb_title:
-            source_line += f" — {kb_title}"
+            source_line += f" - {kb_title}"
 
         source_line += f" (Relevance: {_format_score(item)})"
         response_parts.append(source_line)

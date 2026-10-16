@@ -3440,3 +3440,156 @@ body {
     max-width: 100%;
 }
 
+
+/* =========================================
+   AI AGENTS — UI FINISHING STYLES
+   ========================================= */
+
+.agents-main {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 24px;
+    min-width: 0;
+}
+
+.agents-main .panel {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 18px rgba(15, 23, 42, 0.04);
+}
+
+.agents-main .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.agents-main .agent {
+    min-width: 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 18px;
+    background: #f8fafc;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.agents-main .agent:hover {
+    border-color: #b7c9e8;
+    box-shadow: 0 4px 12px rgba(36, 87, 167, 0.07);
+}
+
+.agents-main .agent h3 {
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.agents-main .status {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px 18px;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+.agents-main .status.ready {
+    background: #eaf8ef;
+    color: #17663a;
+    border-color: #b8e5c7;
+}
+
+.agents-main .status.review {
+    background: #fff7e8;
+    color: #875400;
+    border-color: #f1d6a3;
+}
+
+.agents-main .status.error {
+    background: #fff0f0;
+    color: #a12626;
+    border-color: #f0c1c1;
+}
+
+.agents-main .result-text {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+    line-height: 1.75;
+}
+
+.agents-main pre.result-text {
+    padding: 18px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #f8fafc;
+    color: #1e293b;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 13px;
+    tab-size: 2;
+}
+
+.agents-main details {
+    min-width: 0;
+}
+
+.agents-main details summary {
+    cursor: pointer;
+    color: #2457a7;
+    font-weight: 600;
+    padding: 8px 0;
+}
+
+.agents-main details summary:focus-visible,
+.agents-main button:focus-visible,
+.agents-main textarea:focus-visible {
+    outline: 3px solid #9bbdf4;
+    outline-offset: 3px;
+}
+
+.agents-main .evidence-item {
+    overflow-wrap: anywhere;
+}
+
+.agents-main .score {
+    color: #334155;
+    border: 1px solid #e2e8f0;
+}
+
+.agents-footer {
+    padding: 18px 24px 28px;
+    text-align: center;
+    color: #64748b;
+    font-size: 13px;
+}
+
+@media (max-width: 768px) {
+    .agents-main {
+        padding: 14px;
+    }
+
+    .agents-main .panel {
+        padding: 18px;
+        border-radius: 12px;
+    }
+
+    .agents-main .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .agents-main button {
+        width: 100%;
+        margin-left: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .agents-main .agent {
+        transition: none;
+    }
+}
+
+
