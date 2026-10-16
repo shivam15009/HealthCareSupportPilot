@@ -1,91 +1,46 @@
+
 # ==========================================================
-# OPERATIONAL SUPPORT SEVERITY AND PRIORITY
-# ==========================================================
-#
-# This module handles only operational/IT support impact.
-#
-# It does NOT:
-# - diagnose diseases
-# - predict diseases
-# - recommend treatment
-# - recommend medication
-# - provide medical advice
-#
+# HEALTHCARE SUPPORT PILOT - PRIORITY MANAGEMENT
 # ==========================================================
 
-
+# Default priority for each ticket category
 CATEGORY_DEFAULTS = {
-
-    "Patient Registration":
-        "P3",
-
-    "Laboratory":
-        "P2",
-
-    "Pharmacy":
-        "P2",
-
-    "Billing":
-        "P3",
-
-    "Appointment":
-        "P3",
-
-    "Hospital Network":
-        "P1",
-
-    "Staff Authentication":
-        "P2",
-
-    "Equipment":
-        "P2",
+    "Patient Registration": "P3",
+    "Laboratory": "P2",
+    "Pharmacy": "P2",
+    "Billing": "P3",
+    "Appointment": "P3",
+    "Hospital Network": "P1",
+    "Staff Authentication": "P2",
+    "Equipment": "P2",
 }
 
 
+# Default severity for each ticket category
 CATEGORY_SEVERITY = {
-
-    "Patient Registration":
-        "Medium",
-
-    "Laboratory":
-        "High",
-
-    "Pharmacy":
-        "High",
-
-    "Billing":
-        "Medium",
-
-    "Appointment":
-        "Medium",
-
-    "Hospital Network":
-        "Critical",
-
-    "Staff Authentication":
-        "High",
-
-    "Equipment":
-        "High",
+    "Patient Registration": "Medium",
+    "Laboratory": "High",
+    "Pharmacy": "High",
+    "Billing": "Medium",
+    "Appointment": "Medium",
+    "Hospital Network": "Critical",
+    "Staff Authentication": "High",
+    "Equipment": "High",
 }
 
 
+# Terms indicating a broad hospital incident
 ESCALATION_TERMS = [
-
     "entire hospital",
-
     "all departments",
-
     "emergency department",
-
     "system wide",
-
     "hospital-wide",
-
     "multiple departments",
 ]
 
 
+# Terms indicating a low-impact issue
 LOW_IMPACT_TERMS = [
     "minor",
     "single workstation",
@@ -95,7 +50,10 @@ LOW_IMPACT_TERMS = [
     "one scanner",
     "single scanner",
     "display issue",
+
     "display-only issue",
+
+
     "slow",
     "configuration",
     "maintenance reminder",
@@ -117,89 +75,68 @@ LOW_IMPACT_TERMS = [
 # OPERATIONAL SEVERITY
 # ==========================================================
 
-def operational_severity(
-    category: str,
-    query: str
-):
+def operational_severity(category: str, query: str) -> str:
+    """Determine the operational severity of a ticket."""
 
-    text = query.lower()
+    text = (query or "").lower()
 
-    # Broad operational impact
-    if any(
-        term in text
-        for term in ESCALATION_TERMS
-    ):
-
+    # Broad hospital incidents are critical
+    if any(term in text for term in ESCALATION_TERMS):
         return "Critical"
 
-    # Small operational impact
-    if any(
-        term in text
-        for term in LOW_IMPACT_TERMS
-    ):
-
+    # Low-impact issues receive low severity
+    if any(term in text for term in LOW_IMPACT_TERMS):
         return "Low"
 
-    # Category default
-    return CATEGORY_SEVERITY.get(
-        category,
-        "Medium"
-    )
+    # Otherwise, use the category's default severity
+    return CATEGORY_SEVERITY.get(category, "Medium")
 
 
 # ==========================================================
 # OPERATIONAL PRIORITY
 # ==========================================================
 
-def operational_priority(
-    category: str,
-    query: str
-):
+def operational_priority(category: str, query: str) -> str:
+    """Assign a priority level to a ticket."""
 
-    text = query.lower()
+    text = (query or "").lower()
 
-    # Broad operational impact
-    if any(
-        term in text
-        for term in ESCALATION_TERMS
-    ):
-
+    # Broad hospital incidents receive P1
+    if any(term in text for term in ESCALATION_TERMS):
         return "P1"
 
-    # Small operational impact
-    if any(
-        term in text
-        for term in LOW_IMPACT_TERMS
-    ):
-
+    # Low-impact issues receive P4
+    if any(term in text for term in LOW_IMPACT_TERMS):
         return "P4"
 
-    return CATEGORY_DEFAULTS.get(
-        category,
-        "P3"
-    )
+    # Otherwise, use the category's default priority
+    return CATEGORY_DEFAULTS.get(category, "P3")
 
 
 # ==========================================================
 # HUMAN ESCALATION
 # ==========================================================
 
-def should_escalate(
-    query: str,
-    confidence: float
-):
+def should_escalate(query: str, confidence: float) -> bool:
+    """Determine whether a ticket needs human review."""
 
-    text = query.lower()
+    text = (query or "").lower()
 
+    # Check for broad operational impact
     broad_impact = any(
         term in text
         for term in ESCALATION_TERMS
     )
 
 
-    # Escalate broad operational incidents.
-    if broad_impact:
-
+    # Escalate if classifier confidence is below 70%
+    if confidence < 70:
         return True
 
+
+    # Escalate broad operational incidents
+    if broad_impact:
+        return True
+
+    # No escalation based on these two checks alone
     return False

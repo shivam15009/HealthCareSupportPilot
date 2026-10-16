@@ -1,6 +1,4 @@
-﻿<!doctype html>
-
-
+<!doctype html>
 
 <html lang="en">
 
@@ -384,6 +382,83 @@
 
 <body>
 
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <a href="/dashboard" class="brand-link">
+                <div class="brand-logo">
+                    <img src="{{ url_for('static', filename='images/healthcare-support-pilot.png') }}" alt="Healthcare Support Pilot">
+                </div>
+                <div class="brand-text">
+                    <div class="brand-title">HEALTHCARE</div>
+                    <div class="brand-title">SUPPORTPILOT</div>
+                </div>
+            </a>
+        </div>
+        <div class="sidebar-divider"></div>
+        <div class="nav-section" role="tablist" aria-label="Dashboard views">
+            <div class="nav-label">WORKSPACE</div>
+            <button class="sidebar-link dashboard-tab-link {{ 'active' if active_tab == 'dashboard' else '' }}" type="button" role="tab"
+                    data-bs-toggle="pill" data-bs-target="#dashboard-tab" aria-controls="dashboard-tab"
+                    aria-selected="{{ 'true' if active_tab == 'dashboard' else 'false' }}">
+                <i class="fa-solid fa-chart-line"></i><span>Dashboard</span>
+            </button>
+            <a href="/" class="sidebar-link">
+                <i class="fa-solid fa-ticket"></i><span>Tickets</span>
+            </a>
+            <a href="/rag" class="sidebar-link">
+    <i class="fa-solid fa-book-open"></i><span>RAG Workspace</span>
+</a>
+<a href="/agents" class="sidebar-link">
+    <i class="fa-solid fa-robot"></i><span>AI Agents</span>
+</a>
+            <button class="sidebar-link dashboard-tab-link {{ 'active' if active_tab == 'analytics' else '' }}" type="button" role="tab"
+                    data-bs-toggle="pill" data-bs-target="#analytics-tab" aria-controls="analytics-tab"
+                    aria-selected="{{ 'true' if active_tab == 'analytics' else 'false' }}">
+                <i class="fa-solid fa-chart-simple"></i><span>Analytics</span>
+            </button>
+
+        </div>
+
+        <!-- SIDEBAR BOTTOM -->
+        <div class="sidebar-bottom">
+            <a href="/settings" class="sidebar-link">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </a>
+
+            <a href="#" class="sidebar-link" onclick="logout(); return false;">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main">
+
+        <header class="topbar">
+            <div>
+                <h1 class="page-title">Support Dashboard</h1>
+                <div class="page-subtitle">Healthcare Support Pilot Â· Live ticket metrics</div>
+            </div>
+            <div class="system-status"><span class="status-dot"></span>System Online</div>
+        </header>
+
+        <div class="content">
+            <div class="dashboard-tabs nav nav-pills" role="tablist" aria-label="Dashboard views">
+                <button class="sidebar-link nav-link dashboard-tab-link {{ 'active' if active_tab == 'dashboard' else '' }}"
+                        type="button" role="tab" data-bs-toggle="pill" data-bs-target="#dashboard-tab"
+                        aria-controls="dashboard-tab" aria-selected="{{ 'true' if active_tab == 'dashboard' else 'false' }}">
+                    <i class="fa-solid fa-chart-line"></i> Dashboard
+                </button>
+                <button class="sidebar-link nav-link dashboard-tab-link {{ 'active' if active_tab == 'analytics' else '' }}"
+                        type="button" role="tab" data-bs-toggle="pill" data-bs-target="#analytics-tab"
+                        aria-controls="analytics-tab" aria-selected="{{ 'true' if active_tab == 'analytics' else 'false' }}">
+                    <i class="fa-solid fa-chart-simple"></i> Analytics
+                </button>
+            </div>
+
+
 
 
     <div class="app-shell">
@@ -479,6 +554,7 @@
 
 
             </div>
+
 
 
 
@@ -1347,4 +1423,42 @@ document.querySelectorAll(".category-verification-form").forEach((form) => {
 
 
 
+
+    const categoryLabels = {{ category_labels | tojson }};
+    const categoryValues = {{ category_values | tojson }};
+    const priorityLabels = {{ priority_labels | tojson }};
+    const priorityValues = {{ priority_values | tojson }};
+    const resolutionValues = [
+        {{ resolved_count }},
+        {{ escalated_count }},
+        {{ [total_tickets - resolved_count - escalated_count, 0] | max }}
+    ];
+
+    dashboardCharts.push(new Chart(document.getElementById("category-chart"), {
+        type: "bar",
+        data: { labels: categoryLabels, datasets: [{ label: "Tickets", data: categoryValues, backgroundColor: "#17758b" }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+    }));
+    dashboardCharts.push(new Chart(document.getElementById("resolution-chart"), {
+        type: "pie",
+        data: {
+            labels: ["AI Resolved", "Escalated", "Pending / Not Resolved"],
+            datasets: [{ data: resolutionValues, backgroundColor: ["#26735f", "#bd4b4b", "#d8e2e7"] }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    }));
+    dashboardCharts.push(new Chart(document.getElementById("priority-chart"), {
+        type: "bar",
+        data: { labels: priorityLabels, datasets: [{ label: "Tickets", data: priorityValues, backgroundColor: "#365f9d" }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+    }));
+
+    function logout() {
+        alert("Logout functionality will be connected when authentication is implemented.");
+    }
+</script>
+</body>
+
 </html>
+
+

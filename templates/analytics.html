@@ -1,4 +1,5 @@
-﻿<!doctype html>
+
+<!doctype html>
 
 
 
@@ -1073,4 +1074,36 @@
 
 </html>
 
+
+
+<div class="row g-4 mb-4">
+    <div class="col-xl-6">
+        <section class="dashboard-card">
+            <h2>AI Auto-Resolved vs Human Escalated</h2>
+            <div class="chart-wrap">
+                <canvas id="resolution-doughnut-chart" aria-label="AI auto-resolved versus human escalated tickets"></canvas>
+            </div>
+        </section>
+    </div>
+    <div class="col-xl-6">
+        <section class="dashboard-card">
+            <h2>Ticket Volume by Department</h2>
+            <div class="chart-wrap">
+                <canvas id="department-chart" aria-label="Ticket volume by department"></canvas>
+            </div>
+        </section>
+    </div>
+</div>
+
+<section class="dashboard-card">
+    <h2>Safety Brake Escalations</h2>
+    {% for rule, label in escalation_labels.items() %}
+    <div class="rule-counter">
+        <div class="rule-counter-label">{{ label }}</div>
+        <div class="rule-counter-value" aria-label="{{ escalation_counts[rule] }} tickets">
+            {{ escalation_counts[rule] }}
+        </div>
+    </div>
+    {% endfor %}
+</section>
 
