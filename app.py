@@ -3,7 +3,7 @@ import math
 import re
 from collections import Counter
 
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, abort, request, jsonify, redirect, render_template, url_for
 
 from classifier import classify_query
 
@@ -42,7 +42,7 @@ ESCALATION_RULES = {
     "critical_priority": "Escalated due to Critical Priority / Severity",
     "low_confidence": "Escalated due to Confidence < 70%",
     "human_intent": "Escalated due to Human-Routing Intent",
-    "no_knowledge_evidence": "Escalated due to No Relevant Knowledge Evidence",
+    "no_knowledge_evidence": "Insufficient Knowledge Base Coverage",
 }
 
 
@@ -110,6 +110,7 @@ init_db()
 # ============================================================
 
 @app.route("/")
+@app.route("/ticket")
 def home():
     """Milestone 1 - Ticket Classification page."""
     return render_template("tickets.html")
@@ -118,6 +119,18 @@ def home():
 @app.route("/rag")
 def rag_page():
     """Milestone 2 - AI Resolution / RAG page."""
+    ticket_id = request.args.get("ticket_id", "").strip()
+    if not ticket_id:
+        return redirect(url_for("home"))
+
+    try:
+        ticket_id = int(ticket_id)
+    except ValueError:
+        abort(400, description="ticket_id must be a valid integer")
+
+    if get_ticket(ticket_id) is None:
+        abort(404, description="Ticket not found")
+
     return render_template("rag.html")
 
 
@@ -136,12 +149,22 @@ def dashboard_page():
 
     categories = Counter(row[0] or "Unknown" for row in rows)
     priorities = Counter(row[1] or "Unspecified" for row in rows)
+    departments = Counter(row[0] or "Unknown" for row in rows)
     escalation_counts = Counter()
     resolved_count = 0
     escalated_count = 0
 
     for row in rows:
-        category, priority, status, confidence, description, severity, stored, ai_resolved = row
+        (
+            category,
+            priority,
+            status,
+            confidence,
+            description,
+            severity,
+            stored,
+            ai_resolved,
+        ) = row
         reasons = set()
         try:
             reasons.update(json.loads(stored or "[]"))
@@ -157,7 +180,7 @@ def dashboard_page():
                 severity,
             )
         )
-        if status == "ESCALATE":
+        if status in {"ESCALATE", "ESCALATED"}:
             escalated_count += 1
             for reason in reasons:
                 if reason in ESCALATION_RULES:
@@ -179,6 +202,8 @@ def dashboard_page():
         escalated_count=escalated_count,
         category_labels=list(categories.keys()),
         category_values=list(categories.values()),
+        department_labels=list(departments.keys()),
+        department_values=list(departments.values()),
         priority_labels=list(priorities.keys()),
         priority_values=list(priorities.values()),
         escalation_labels=ESCALATION_RULES,
@@ -223,7 +248,7 @@ def create_ticket():
     )
 
     status = (
-        "ESCALATE"
+        "ESCALATED"
         if requires_human_escalation(
             description,
             priority,
@@ -341,9 +366,10 @@ def rag_resolution():
             "Ignoring invalid escalation reason data for ticket %s",
             ticket_id,
         )
-    needs_human_review = bool(escalation_reasons) or ticket.get("status") == "ESCALATE"
-    if needs_human_review and ticket.get("status") != "ESCALATE":
-        update_ticket_status(ticket_id, "ESCALATE")
+    needs_human_review = (
+        bool(escalation_reasons)
+        or ticket.get("status") in {"ESCALATE", "ESCALATED"}
+    )
 
     # --------------------------------------------------------
     # Run complete Milestone 2 RAG pipeline
@@ -383,10 +409,19 @@ def rag_resolution():
         ""
     )
 
+    relevance_scores = []
+    for article in evidence:
+        try:
+            relevance_scores.append(float(article.get("score", 0)))
+        except (TypeError, ValueError):
+            relevance_scores.append(0.0)
+
     status = ticket.get("status")
     knowledge_requires_escalation = (
         rag_result.get("requires_escalation", False)
+        or rag_result.get("status") == "ESCALATED"
         or not evidence
+        or max(relevance_scores, default=0.0) < 0.30
         or (
             not needs_human_review
             and not str(resolution or "").strip()
@@ -396,24 +431,10 @@ def rag_resolution():
         escalation_reasons.add("no_knowledge_evidence")
     update_ticket_escalation_reasons(ticket_id, escalation_reasons)
     if needs_human_review or knowledge_requires_escalation:
-        status = "ESCALATE"
+        status = "ESCALATED"
         if ticket.get("status") != status:
             update_ticket_status(ticket_id, status)
-        if needs_human_review:
-            resolution = (
-                "Issue Summary\n"
-                "This ticket was escalated to a human support agent.\n\n"
-                "Operational Area\n"
-                f"{category}\n\n"
-                "Recommended Troubleshooting Steps\n"
-                "1. AI auto-resolution was skipped; await human support.\n\n"
-                "Knowledge Sources"
-            )
-        elif not resolution:
-            resolution = (
-                "No sufficiently relevant knowledge-base evidence "
-                "with troubleshooting steps was found for this ticket."
-            )
+        resolution = "AI resolution was skipped; human support review is required."
         update_ticket_ai_resolved(ticket_id, False)
     else:
         update_ticket_ai_resolved(ticket_id, True)
@@ -434,6 +455,15 @@ def rag_resolution():
         "priority": ticket.get("priority"),
         "confidence": confidence,
         "status": status,
+        "escalation_reason": (
+            ESCALATION_RULES["no_knowledge_evidence"]
+            if "no_knowledge_evidence" in escalation_reasons
+            else "; ".join(
+                ESCALATION_RULES[reason]
+                for reason in sorted(escalation_reasons)
+                if reason in ESCALATION_RULES
+            )
+        ),
 
         # Milestone 2 results
         "evidence": evidence,

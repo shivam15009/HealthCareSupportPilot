@@ -48,9 +48,9 @@
             <a href="/" class="sidebar-link">
                 <i class="fa-solid fa-ticket"></i><span>Tickets</span>
             </a>
-            <a href="/rag" class="sidebar-link">
+            <span class="sidebar-link" aria-disabled="true" title="Open AI Resolution from a specific ticket">
                 <i class="fa-solid fa-wand-magic-sparkles"></i><span>AI Agents</span>
-            </a>
+            </span>
             <button class="sidebar-link dashboard-tab-link {{ 'active' if active_tab == 'analytics' else '' }}" type="button" role="tab"
                     data-bs-toggle="pill" data-bs-target="#analytics-tab" aria-controls="analytics-tab"
                     aria-selected="{{ 'true' if active_tab == 'analytics' else 'false' }}">
@@ -124,17 +124,7 @@
 
                 <section id="analytics-tab" class="tab-pane fade {{ 'show active' if active_tab == 'analytics' else '' }}"
                          role="tabpanel" tabindex="0">
-                    <section class="dashboard-card">
-                        <h2>Safety Brake Escalations</h2>
-                        {% for rule, label in escalation_labels.items() %}
-                        <div class="rule-counter">
-                            <div class="rule-counter-label">{{ label }}</div>
-                            <div class="rule-counter-value" aria-label="{{ escalation_counts[rule] }} tickets">
-                                {{ escalation_counts[rule] }}
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </section>
+                    {% include "analytics.html" %}
                 </section>
             </div>
         </div>
@@ -154,14 +144,14 @@
                 link.classList.toggle("active", active);
                 link.setAttribute("aria-selected", String(active));
             });
-            if (target === "#dashboard-tab") {
-                dashboardCharts.forEach((chart) => chart.resize());
-            }
+            dashboardCharts.forEach((chart) => chart.resize());
         });
     });
 
     const categoryLabels = {{ category_labels | tojson }};
     const categoryValues = {{ category_values | tojson }};
+    const departmentLabels = {{ department_labels | tojson }};
+    const departmentValues = {{ department_values | tojson }};
     const priorityLabels = {{ priority_labels | tojson }};
     const priorityValues = {{ priority_values | tojson }};
     const resolutionValues = [
@@ -186,6 +176,19 @@
     dashboardCharts.push(new Chart(document.getElementById("priority-chart"), {
         type: "bar",
         data: { labels: priorityLabels, datasets: [{ label: "Tickets", data: priorityValues, backgroundColor: "#365f9d" }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+    }));
+    dashboardCharts.push(new Chart(document.getElementById("resolution-doughnut-chart"), {
+        type: "doughnut",
+        data: {
+            labels: ["AI Auto-Resolved", "Human Escalated"],
+            datasets: [{ data: [{{ resolved_count }}, {{ escalated_count }}], backgroundColor: ["#26735f", "#bd4b4b"] }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    }));
+    dashboardCharts.push(new Chart(document.getElementById("department-chart"), {
+        type: "bar",
+        data: { labels: departmentLabels, datasets: [{ label: "Tickets", data: departmentValues, backgroundColor: "#17758b" }] },
         options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
     }));
 </script>
