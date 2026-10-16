@@ -60,3 +60,13 @@ models/*before*.pkl
 models/*uncalibrated*.pkl
 data/*backup*.json
 data/*before*.json
+
+# Ignore all Python test files
+test*.py
+*_test.py
+
+# Ignore test directories
+tests/
+
+# Ignore generated classification test results
+classification_test_results.csv

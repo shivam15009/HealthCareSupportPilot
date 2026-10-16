@@ -144,6 +144,7 @@ def send_support_ticket_notification(
         raise ValueError("ticket_id is required to send a notification")
 
     body_lines = [
+        "Hello ",
         "Your support ticket requires human review.",
         "",
         f"Ticket ID: {ticket_id}",
@@ -152,6 +153,8 @@ def send_support_ticket_notification(
         f"Priority: {ticket.get('priority') or 'Not specified'}",
         f"Severity: {ticket.get('severity') or 'Not specified'}",
         f"Status: {ticket.get('status') or 'ESCALATE'}",
+
+        "Our Support Team will contact you soon.",
     ]
 
     if jira_issue_key:
@@ -195,6 +198,7 @@ def send_resolution_notification(
         )
 
     body_lines = [
+        "Hello ",
         "Your support ticket has been automatically resolved.",
         "",
         f"Ticket ID: {ticket_id}",

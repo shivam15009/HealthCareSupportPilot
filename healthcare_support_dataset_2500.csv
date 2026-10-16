@@ -1,4 +1,4 @@
-text,category
+﻿text,category
 The pharmacy portal cannot retrieve a patient’s active prescription list.,Pharmacy
 An operational support ticket was raised because the identity directory lookup returns no results.,Staff Authentication
 hospital account login is unavailable,Staff Authentication
@@ -2499,3 +2499,27 @@ new patient intake screen is unavailable,Patient Registration
 Please investigate: the test status remains in progress even though the analyzer run is complete.,Laboratory
 The support team received a report that the laboratory report viewer opens a blank page for completed tests.,Laboratory
 Routine operations are affected because the system displays an expired item as available for dispensing.,Pharmacy
+The physical USB keyboard disconnects repeatedly from the workstation during normal typing.,Equipment
+The operating system does not detect the barcode scanner connected to the workstation USB port.,Equipment
+The workstation printer driver is missing and the operating system cannot recognize the printer.,Equipment
+A physical label printer produces blank pages when a test print is sent from multiple applications.,Equipment
+The external monitor connected to the workstation loses its display signal when the cable is moved.,Equipment
+The workstation mouse intermittently stops responding because its physical connection drops.,Equipment
+The printer hardware reports an offline state even though the workstation and network are operating normally.,Equipment
+The barcode scanner trigger button does not respond when scanning a test barcode.,Equipment
+The workstation reports that the connected peripheral device driver failed to start.,Equipment
+A physical printer repeatedly jams during test printing despite the document being sent successfully.,Equipment
+The external keyboard is not detected after reconnecting its USB cable.,Equipment
+The workstation docking station fails to recognize its connected monitor and keyboard.,Equipment
+The laboratory information system cannot locate a specimen with a valid accession number.,Laboratory
+The laboratory application fails to import completed analyzer results into the laboratory result queue.,Laboratory
+A completed laboratory test remains marked as pending in the specimen processing workflow.,Laboratory
+The laboratory report viewer opens a blank page when a demonstration test report is selected.,Laboratory
+The specimen tracking system does not update the processing status after a laboratory workflow step completes.,Laboratory
+The laboratory information system displays an error when importing results from the connected analyzer.,Laboratory
+The laboratory dashboard shows an outdated count of specimens awaiting processing.,Laboratory
+A laboratory test result is available from the analyzer but does not appear in the laboratory application.,Laboratory
+"The specimen accession record exists, but the laboratory software cannot associate it with the test request.",Laboratory
+The laboratory interface fails to transfer approved demonstration results into the reporting queue.,Laboratory
+The laboratory application cannot display the status of a test after the analyzer run finishes.,Laboratory
+The laboratory results workflow remains incomplete because the imported result is not linked to its test record.,Laboratory
