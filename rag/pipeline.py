@@ -1,3 +1,33 @@
+"""
+Healthcare Support Pilot
+Milestone 2 - RAG Pipeline
+
+Connects the knowledge retriever and resolution generator.
+
+Pipeline:
+
+Support Ticket
+      ↓
+Predicted Category
+      ↓
+Knowledge Retrieval
+      ↓
+Top KB Evidence
+      ↓
+Context Augmentation
+      ↓
+Operational Resolution
+
+Safety scope:
+- Healthcare operational support only
+- IT/system troubleshooting only
+- No diagnosis
+- No disease prediction
+- No treatment recommendations
+- No medication recommendations
+- No dosage advice
+- No personalized medical advice
+"""
 
 from rag.retriever import KnowledgeRetriever
 from rag.generator import generate_support_response
@@ -317,25 +347,15 @@ def build_retrieval_query(ticket_text, category=None):
     return original
 
 class SupportPipeline:
-    """Run the complete local RAG workflow."""
+    """Run the complete local Milestone 2 RAG workflow."""
 
     def __init__(self):
         """Initialize the knowledge-base retriever."""
         self.retriever = KnowledgeRetriever()
 
-
     def run(self, ticket_text, category=None, top_k=3, generate_resolution=True):
-=======
-    def run(
-        self,
-        ticket_text,
-        category=None,
-        top_k=3,
-        generate_resolution=True,
-    ):
-
         """
-        Retrieve knowledge and optionally generate a resolution.
+        Run retrieval, context augmentation, and resolution generation.
 
         Parameters
         ----------
@@ -343,13 +363,10 @@ class SupportPipeline:
             Original support ticket description.
 
         category : str, optional
-            Category predicted by the ticket classifier.
+            Category predicted by classifier.py.
 
         top_k : int
-            Maximum number of knowledge records to retrieve.
-
-        generate_resolution : bool
-            Whether to generate troubleshooting instructions.
+            Maximum number of knowledge-base entries to retrieve.
 
         generate_resolution : bool
             If False, return retrieved evidence and context without generating
@@ -358,13 +375,12 @@ class SupportPipeline:
         Returns
         -------
         dict
-            Evidence, context, resolution, and escalation information.
+            Retrieved evidence, augmented context, and resolution.
         """
-
         ticket_text = (ticket_text or "").strip()
 
         # --------------------------------------------------
-        # STEP 1: VALIDATE THE TICKET
+        # VALIDATE TICKET
         # --------------------------------------------------
         if not ticket_text:
             return {
@@ -373,9 +389,7 @@ class SupportPipeline:
                 "resolution": (
                     "No support ticket description was provided."
                 ),
-                "requires_escalation": True,
             }
-
 
 
         # STEP 1: KNOWLEDGE BASE RETRIEVAL
@@ -389,11 +403,6 @@ class SupportPipeline:
             f"[DEBUG] Retrieval query: {retrieval_query!r}",
             flush=True,
         )
-
-
-        # --------------------------------------------------
-        # STEP 2: RETRIEVE RELEVANT KNOWLEDGE
-        # --------------------------------------------------
 
         evidence = self.retriever.search(
             query=retrieval_query,
@@ -429,7 +438,6 @@ class SupportPipeline:
             ],
         )
         # --------------------------------------------------
-
         # STEP 2: CONTEXT AUGMENTATION
         # --------------------------------------------------
         # Keep the retrieval result usable even when generation is
@@ -464,70 +472,24 @@ class SupportPipeline:
             generation_time_ms = response.get("generation_time_ms")
 
 
-        # STEP 3: CHECK KNOWLEDGE AVAILABILITY
         # --------------------------------------------------
-        if not evidence:
-            return {
-                "evidence": [],
-                "context": "",
-                "resolution": (
-                    "No sufficiently relevant knowledge-base "
-                    "evidence was found for this ticket."
-                ) if generate_resolution else "",
-                "requires_escalation": True,
-            }
-
-
-        # --------------------------------------------------
-        # STEP 4: GENERATE OPERATIONAL RESOLUTION
-        # --------------------------------------------------
-        if generate_resolution:
-            response = generate_support_response(
-                ticket_text=ticket_text,
-                evidence=evidence,
-                category=category,
-            )
-
-            context = response.get("context", "")
-            resolution = response.get("resolution", "")
-
-            # A resolution must contain usable troubleshooting
-            # instructions. Evidence alone is not sufficient.
-            requires_escalation = not bool(
-                str(resolution or "").strip()
-                and "No sufficiently relevant knowledge-base evidence"
-                not in str(resolution)
-            )
-
-        else:
-            # Human review is required, so skip resolution
-            # generation while retaining retrieved evidence.
-            context = ""
-            resolution = ""
-            requires_escalation = False
-
-        # --------------------------------------------------
-        # STEP 5: RETURN RESULTS
+        # STEP 3: RETURN COMPLETE RESULT
         # --------------------------------------------------
 
         return {
             "evidence": evidence,
             "context": context,
             "resolution": resolution,
-
             "generation_time_ms": (
                 generation_time_ms
                 if generate_resolution and evidence
                 else None
             ),
-
-            "requires_escalation": requires_escalation,
-
         }
 
 
 
-# =======================
+# ==========================================================
 # SINGLE PIPELINE INSTANCE
 # ==========================================================
 
@@ -538,28 +500,18 @@ _pipeline = None
 # CONVENIENCE FUNCTION
 # ==========================================================
 
-
 def run_pipeline(ticket_text, category=None, top_k=3, generate_resolution=True):
-
-def run_pipeline(
-    ticket_text,
-    category=None,
-    top_k=3,
-    generate_resolution=True,
-):
-
     """
-    Run the RAG pipeline.
+    Run the Milestone 2 RAG pipeline.
 
     Example
     -------
     result = run_pipeline(
-        ticket_text="The laboratory system is not syncing results",
+        "Laboratory system is not syncing results",
         category="Laboratory",
         top_k=3,
     )
     """
-
     global _pipeline
 
     if _pipeline is None:
