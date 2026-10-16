@@ -34,6 +34,7 @@ Safety scope:
 
 import json
 import re
+import logging
 from pathlib import Path
 
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -50,8 +51,8 @@ DEFAULT_TOP_K = 3
 CATEGORY_BONUS = 0.12
 KEYWORD_BONUS = 0.10
 
-WORD_WEIGHT = 0.75
-CHARACTER_WEIGHT = 0.25
+WORD_WEIGHT = 0.60
+CHARACTER_WEIGHT = 0.40
 
 MAX_TOP_K = 10
 
@@ -146,6 +147,76 @@ OPERATIONAL_KEYWORDS = {
         "maintenance",
     },
 }
+
+# ============================================================
+# OPERATIONAL PROBLEM TYPES
+# ============================================================
+
+PROBLEM_TYPE_KEYWORDS = {
+    "service_unavailable": {
+        "service unavailable",
+        "service unavailable message",
+        "service outage",
+        "application unavailable",
+        "temporarily unavailable",
+    },
+    "connectivity": {
+        "cannot connect",
+        "connection error",
+        "connectivity",
+        "network connection",
+        "connection timeout",
+    },
+    "printing": {
+        "print",
+        "printing",
+        "printer",
+        "print queue",
+        "transaction document",
+    },
+    "authentication": {
+        "authentication",
+        "authenticate",
+        "login",
+        "log in",
+        "sign in",
+        "password",
+    },
+    "timeout": {
+        "timeout",
+        "timed out",
+        "request timed out",
+    },
+    "status_not_updating": {
+        "not updating",
+        "stale status",
+        "status not updated",
+        "status screen",
+    },
+}
+def detect_problem_types(text):
+    """Detect specific operational failure types in text."""
+    normalized = normalize_text(text)
+    detected = set()
+
+    if not normalized:
+        return detected
+
+    for problem_type, keywords in PROBLEM_TYPE_KEYWORDS.items():
+        for keyword in keywords:
+            keyword_normalized = normalize_text(keyword)
+
+            if re.search(
+                r"(?<!\w)" + re.escape(keyword_normalized) + r"(?!\w)",
+                normalized,
+            ):
+                detected.add(problem_type)
+                break
+
+    return detected
+
+
+
 
 
 # ============================================================
@@ -345,21 +416,14 @@ def clean_variant_text(text):
     return normalized.strip()
 
 
+
 def build_duplicate_signature(document):
     """
-    Create a normalized identity for an operational KB entry.
-
-    Prefer issue + category + normalized resolution rather than
-    the KB title alone. This prevents near-identical records from
-    filling all top-K evidence slots.
+    Group records with identical operational procedures, even when
+    their issue text differs only by workstation or reporting context.
     """
-
     category = clean_variant_text(
         document.get("category", "")
-    )
-
-    issue = clean_variant_text(
-        document.get("issue", "")
     )
 
     resolution = document.get("resolution", "")
@@ -371,13 +435,11 @@ def build_duplicate_signature(document):
 
     resolution = clean_variant_text(resolution)
 
-    # Keep the signature compact while retaining enough information
-    # to distinguish genuinely different procedures.
     return (
         category,
-        issue,
-        resolution[:300],
+        resolution,
     )
+
 
 
 # ============================================================
@@ -615,16 +677,43 @@ class KnowledgeRetriever:
                 document,
             )
 
+
             keyword_bonus = (
                 KEYWORD_BONUS * keyword_score
             )
 
-            final_score = min(
-                base_score
-                + category_bonus
-                + keyword_bonus,
-                1.0,
+            query_problem_types = detect_problem_types(query)
+            document_problem_types = detect_problem_types(
+                " ".join([
+                    str(document.get("title", "")),
+                    str(document.get("issue", "")),
+                    str(document.get("keywords", "")),
+                ])
             )
+
+
+
+            problem_type_adjustment = 0.0
+
+            if query_problem_types:
+                if query_problem_types.intersection(document_problem_types):
+                    problem_type_adjustment = 0.15
+                elif document_problem_types:
+                    problem_type_adjustment = -0.05
+
+
+
+            final_score = max(
+                0.0,
+                min(
+                    base_score
+                    + category_bonus
+                    + keyword_bonus
+                    + problem_type_adjustment,
+                    1.0,
+                ),
+            )
+
 
             # ------------------------------------------------
             # Minimum relevance
@@ -634,14 +723,26 @@ class KnowledgeRetriever:
             # never make an unrelated document pass.
             # ------------------------------------------------
 
-            if (
-                base_score < 0.20
-                and keyword_score < 0.35
-            ):
+           # Require a minimum text-similarity signal.
+            # Category and keyword bonuses must not rescue a weak match.
+            if base_score < 0.15:
                 continue
 
             if final_score < MIN_RELEVANCE:
                 continue
+
+
+
+            if final_score >= MIN_RELEVANCE:
+                logging.warning(
+                    "Accepted retrieval candidate: "
+                    "requested_category=%r document_category=%r "
+                    "title=%r score=%.4f",
+                    requested_category,
+                    document.get("category"),
+                    document.get("title"),
+                    final_score,
+                )
 
             candidates.append({
                 "index": index,
@@ -651,7 +752,11 @@ class KnowledgeRetriever:
                 "character_score": character_score,
                 "keyword_score": keyword_score,
                 "category_bonus": category_bonus,
+                "problem_type_adjustment": problem_type_adjustment,
             })
+
+
+
 
         # ----------------------------------------------------
         # Sort candidates
@@ -695,6 +800,12 @@ class KnowledgeRetriever:
             if isinstance(resolution, str):
                 resolution = [resolution]
 
+            logging.warning(
+                "FINAL RETRIEVAL RESULT: title=%r category=%r score=%.4f",
+                document.get("title"),
+                document.get("category"),
+                candidate["score"],
+            )
             results.append({
                 "kb_id": document.get("kb_id"),
                 "title": document.get("title"),
@@ -711,6 +822,15 @@ class KnowledgeRetriever:
                     candidate["score"],
                     4,
                 ),
+
+                # Diagnostic scoring fields
+                "base_score": round(candidate["base_score"], 4),
+                "word_score": round(candidate["word_score"], 4),
+                "character_score": round(candidate["character_score"], 4),
+                "keyword_score": round(candidate["keyword_score"], 4),
+                "category_bonus": round(candidate["category_bonus"], 4),
+                "problem_type_adjustment": candidate["problem_type_adjustment"],
+
                 "source_title": document.get(
                     "source_title"
                 ),
@@ -724,6 +844,7 @@ class KnowledgeRetriever:
                     "source_note"
                 ),
             })
+
 
             if len(results) >= top_k:
                 break

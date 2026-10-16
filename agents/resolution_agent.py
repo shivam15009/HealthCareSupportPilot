@@ -3,7 +3,7 @@ from rag.generator import generate_support_response
 
 
 class ResolutionAgent:
-    """Generate a response grounded in retrieved evidence."""
+    """Generate an operational support response grounded in evidence."""
 
     def run(self, ticket_text, evidence, category=None):
         ticket_text = (ticket_text or "").strip()
@@ -14,6 +14,8 @@ class ResolutionAgent:
                 "success": False,
                 "context": "",
                 "resolution": "",
+                "requires_escalation": True,
+                "agent": "Resolution Agent",
                 "error": "Ticket description cannot be empty.",
             }
 
@@ -25,6 +27,8 @@ class ResolutionAgent:
                     "No relevant knowledge-base evidence was found. "
                     "Human support review is required."
                 ),
+                "requires_escalation": True,
+                "agent": "Resolution Agent",
                 "error": "No evidence available.",
             }
 
@@ -35,27 +39,32 @@ class ResolutionAgent:
                 category=category,
             )
 
-            context = result.get("context", "")
-            resolution = result.get("resolution", "")
+            if not isinstance(result, dict):
+                raise ValueError(
+                    "The response generator must return a dictionary."
+                )
 
-            # The generator may return a message explaining that
-            # evidence is insufficient instead of actual steps.
+            context = result.get("context", "")
+            resolution = str(result.get("resolution", "")).strip()
+
             insufficient_evidence = (
                 "No sufficiently relevant knowledge-base evidence"
                 in resolution
             )
 
-            success = bool(
-                resolution.strip()
-                and not insufficient_evidence
-            )
+            success = bool(resolution) and not insufficient_evidence
 
             return {
                 "success": success,
                 "context": context,
                 "resolution": resolution,
-                "agent": "Resolution Agent",
                 "requires_escalation": not success,
+                "agent": "Resolution Agent",
+                "message": (
+                    "Operational response generated from retrieved evidence."
+                    if success
+                    else "Evidence was insufficient to generate a response."
+                ),
             }
 
         except Exception:
@@ -64,10 +73,10 @@ class ResolutionAgent:
                 "context": "",
                 "resolution": (
                     "Resolution generation failed. "
-                    "Please refer this ticket for human review."
+                    "Please refer this ticket for human support review."
                 ),
-                "agent": "Resolution Agent",
                 "requires_escalation": True,
+                "agent": "Resolution Agent",
                 "error": "The generator could not process the evidence.",
             }
 
@@ -80,7 +89,6 @@ if __name__ == "__main__":
     )
     category = "Hospital Network"
 
-    # Retrieve evidence without generating a resolution yet.
     retrieval = run_pipeline(
         ticket_text=ticket_text,
         category=category,
@@ -97,7 +105,7 @@ if __name__ == "__main__":
 
     print("\n--- Resolution Agent Result ---")
     print("Success:", result["success"])
-    print("Requires escalation:", result.get("requires_escalation"))
+    print("Requires escalation:", result["requires_escalation"])
     print("Agent:", result["agent"])
     print("\nResolution:\n")
     print(result["resolution"])

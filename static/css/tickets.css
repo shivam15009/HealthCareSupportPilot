@@ -3441,6 +3441,50 @@ body {
 }
 
 
+
+.sidebar-user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 10px 8px;
+    padding: 14px 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    min-width: 0;
+}
+
+.sidebar-user-avatar {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.16);
+    color: inherit;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.sidebar-user-details {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.sidebar-user-name {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: inherit;
+}
+
+.sidebar-user-status {
+    margin-top: 3px;
+    font-size: 11px;
+    opacity: 0.7;
+    color: inherit;
+}
+
 /* =========================================
    AI AGENTS — UI FINISHING STYLES
    ========================================= */
@@ -3591,5 +3635,6 @@ body {
         transition: none;
     }
 }
+
 
 

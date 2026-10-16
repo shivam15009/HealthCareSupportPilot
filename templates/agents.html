@@ -1,4 +1,594 @@
 
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Healthcare Support Pilot | AI Agents</title>
+
+    <!-- Libraries -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- Existing project styling -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tickets.css') }}">
+
+    <style>
+        /* =====================================================
+           MILESTONE 3 — PAGE LAYOUT
+        ===================================================== */
+
+        .content {
+            max-width: 1800px;
+            margin-inline: auto;
+        }
+
+        .agent-workspace-grid {
+            display: grid;
+            grid-template-columns: minmax(320px, .82fr) minmax(0, 1.35fr);
+            gap: 24px;
+            align-items: start;
+        }
+
+        .agent-left-column,
+        .agent-right-column {
+            display: grid;
+            gap: 20px;
+            min-width: 0;
+        }
+
+        .agent-workspace-grid .main-card {
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .agent-workspace-grid .card-header-custom {
+            padding: 20px 24px 16px;
+        }
+
+        .agent-workspace-grid .card-body-custom {
+            padding: 20px 24px;
+        }
+
+        .agent-workspace-grid .card-header-custom h2 {
+            font-size: 21px;
+            margin-bottom: 5px;
+        }
+
+        .agent-workspace-grid .card-header-custom p {
+            margin-bottom: 0;
+            line-height: 1.5;
+        }
+
+        /* =====================================================
+           HERO
+        ===================================================== */
+
+        .agent-hero-icon {
+            width: 68px;
+            height: 68px;
+            min-width: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 193, 70, .4);
+            background: rgba(255, 255, 255, .09);
+            color: #ffc857;
+            font-size: 27px;
+        }
+
+        /* =====================================================
+           STATISTICS
+        ===================================================== */
+
+        .agent-stat-note {
+            color: #718096;
+            font-size: 12px;
+            margin-top: 3px;
+        }
+
+        /* =====================================================
+           FORM
+        ===================================================== */
+
+        #ticket-text {
+            min-height: 190px;
+            resize: vertical;
+        }
+
+        .agent-character-count {
+            font-size: 12px;
+            color: #718096;
+        }
+
+        .agent-actions {
+            display: flex;
+            align-items: stretch;
+            gap: 10px;
+        }
+
+        .agent-actions .submit-btn {
+            flex: 1 1 180px;
+            margin: 0;
+            text-align: center;
+        }
+
+        .agent-secondary-btn {
+            flex: 0 0 auto;
+            border: 1px solid #d7dee8;
+            background: #fff;
+            color: #263b56;
+            border-radius: 8px;
+            padding: 11px 16px;
+            font-weight: 600;
+        }
+
+        .agent-secondary-btn:hover {
+            background: #f4f6f9;
+        }
+
+        .agent-primary-btn:disabled,
+        .agent-secondary-btn:disabled {
+            opacity: .65;
+            cursor: not-allowed;
+        }
+
+        /* =====================================================
+           WORKFLOW STAGES
+        ===================================================== */
+
+        .agent-stage {
+            display: flex;
+            gap: 13px;
+            align-items: flex-start;
+            padding: 16px 0;
+            border-bottom: 1px solid #e8edf4;
+        }
+
+        .agent-stage:first-child {
+            padding-top: 0;
+        }
+
+        .agent-stage:last-child {
+            border-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .agent-step-icon {
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: #edf4ff;
+            color: #3165b9;
+            font-size: 17px;
+        }
+
+        .agent-stage h3 {
+            font-size: 14px;
+            font-weight: 750;
+            margin: 0 0 5px;
+        }
+
+        .agent-stage p {
+            font-size: 13px;
+            line-height: 1.55;
+            color: #718096;
+            margin: 0;
+        }
+
+        /* =====================================================
+           RESULT SUMMARY
+        ===================================================== */
+
+        .agent-summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+            padding: 18px;
+            background: #f5f8fd;
+            border: 1px solid #e3eaf5;
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+
+        .agent-summary-label,
+        .agent-section-label {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #718096;
+            margin-bottom: 6px;
+        }
+
+        .agent-summary h3 {
+            font-size: 20px;
+            font-weight: 800;
+            overflow-wrap: anywhere;
+            margin: 0;
+            color: #102f56;
+        }
+
+        .agent-summary-message {
+            font-size: 13px;
+            line-height: 1.6;
+            color: #5e6d80;
+            margin: 8px 0 0;
+        }
+
+        /* =====================================================
+           STATUS BADGES
+        ===================================================== */
+
+        .agent-status {
+            display: inline-flex;
+            align-items: center;
+            width: fit-content;
+            max-width: 100%;
+            overflow-wrap: anywhere;
+            border-radius: 20px;
+            padding: 6px 10px;
+            background: #f0f2f5;
+            color: #48566a;
+            font-size: 11px;
+            font-weight: 750;
+        }
+
+        .agent-status.success {
+            background: #e6f7ed;
+            color: #187443;
+        }
+
+        .agent-status.warning {
+            background: #fff2d6;
+            color: #875b00;
+        }
+
+        .agent-status.error {
+            background: #fde8e8;
+            color: #a52727;
+        }
+
+        /* =====================================================
+           AGENT RESULTS
+        ===================================================== */
+
+        .agent-result-step {
+            display: grid;
+            grid-template-columns: 42px minmax(0, 1fr);
+            gap: 13px;
+            padding: 19px 0;
+            border-bottom: 1px solid #e8edf4;
+        }
+
+        .agent-result-step:last-child {
+            border-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .agent-result-content {
+            min-width: 0;
+        }
+
+        .agent-result-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 9px;
+        }
+
+        .agent-result-heading h3 {
+            font-size: 15px;
+            font-weight: 750;
+            margin: 0;
+        }
+
+        .agent-output {
+            margin-top: 8px;
+            padding: 13px 15px;
+            border-radius: 10px;
+            background: #f7f9fc;
+            border: 1px solid #e6ecf4;
+            font-size: 13px;
+            line-height: 1.7;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+            max-width: 100%;
+        }
+
+        .agent-output:empty {
+            display: none;
+        }
+
+        /* =====================================================
+           CONFIDENCE BAR
+        ===================================================== */
+
+        .agent-progress-track {
+            width: 100%;
+            height: 7px;
+            background: #e9edf2;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-top: 9px;
+        }
+
+        .agent-progress-fill {
+            height: 100%;
+            width: 0;
+            background: #4776d0;
+            border-radius: 20px;
+            transition: width .25s ease;
+        }
+
+        /* =====================================================
+           EVIDENCE
+        ===================================================== */
+
+        .agent-evidence {
+            padding: 13px;
+            border: 1px solid #e6ecf4;
+            border-radius: 10px;
+            margin-top: 9px;
+            background: #fff;
+        }
+
+        .agent-evidence-title {
+            font-size: 13px;
+            font-weight: 750;
+            margin-bottom: 5px;
+            overflow-wrap: anywhere;
+        }
+
+        .agent-evidence-meta {
+            font-size: 12px;
+            color: #718096;
+        }
+
+        .agent-evidence-body {
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 8px 0 0;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        /* =====================================================
+           EXPANDABLE DETAILS
+        ===================================================== */
+
+        .agent-detail-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            border: 0;
+            background: transparent;
+            color: #245ca8;
+            font-size: 12px;
+            font-weight: 750;
+            cursor: pointer;
+        }
+
+        .agent-detail-toggle:hover {
+            color: #123d75;
+        }
+
+        .agent-detail-content[hidden],
+        #results[hidden],
+        #empty-state[hidden],
+        #confidence-container[hidden] {
+            display: none !important;
+        }
+
+        .agent-detail-content {
+            margin-top: 5px;
+        }
+
+        /* =====================================================
+           MESSAGES AND EMPTY STATE
+        ===================================================== */
+
+        .agent-message {
+            display: none;
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .agent-message.visible {
+            display: block;
+        }
+
+        .agent-message.error {
+            background: #fde8e8;
+            color: #a52727;
+        }
+
+        .agent-message.info {
+            background: #eaf2ff;
+            color: #244b91;
+        }
+
+        .agent-empty-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            background: #edf4ff;
+            color: #3165b9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 25px;
+        }
+
+        /* =====================================================
+           HUMAN OVERSIGHT
+        ===================================================== */
+
+        .agent-oversight {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #dce8f8;
+            background: #f3f8ff;
+            color: #244b75;
+            font-size: 13px;
+        }
+
+        .agent-oversight>i {
+            color: #2873ce;
+            margin-top: 3px;
+        }
+
+        .agent-oversight p {
+            margin: 4px 0 0;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 1100px) {
+            .agent-workspace-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .agent-workspace-grid {
+                gap: 16px;
+            }
+
+            .agent-workspace-grid .card-header-custom {
+                padding: 17px 18px 13px;
+            }
+
+            .agent-workspace-grid .card-body-custom {
+                padding: 17px 18px;
+            }
+
+            .agent-summary {
+                padding: 14px;
+            }
+
+            .agent-summary h3 {
+                font-size: 17px;
+            }
+
+            .agent-actions {
+                flex-direction: column;
+            }
+
+            .agent-actions .agent-secondary-btn,
+            .agent-actions .submit-btn {
+                width: 100%;
+            }
+
+            .agent-result-step {
+                grid-template-columns: 36px minmax(0, 1fr);
+                gap: 10px;
+            }
+
+            .agent-result-step .agent-step-icon {
+                width: 36px;
+                height: 36px;
+                min-width: 36px;
+            }
+        }
+
+        /* =====================================================
+   AGENT WORKSPACE LAYOUT
+   Run Agent Workflow + Workflow Stages in one row
+   Workflow Results spans the full width below
+===================================================== */
+
+.agent-workspace-grid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: stretch;
+    gap: 24px;
+}
+
+/* Let the cards participate directly in the workspace grid */
+.agent-left-column,
+.agent-right-column {
+    display: contents !important;
+}
+
+/* Workflow Results occupies the entire second row */
+.agent-right-column > section.main-card {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+}
+
+/* Stack the cards on smaller screens */
+@media (max-width: 900px) {
+    .agent-workspace-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .agent-right-column > section.main-card {
+        grid-column: 1;
+    }
+}
+
+
+.sidebar-user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 10px 8px;
+    padding: 14px 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    min-width: 0;
+}
+
+.sidebar-user-avatar {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.16);
+    color: inherit;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.sidebar-user-details {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.sidebar-user-name {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: inherit;
+}
+
+.sidebar-user-status {
+    margin-top: 3px;
+    font-size: 11px;
+    opacity: 0.7;
+    color: inherit;
+}
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -274,22 +864,38 @@
                 transition-duration: 0.01ms !important;
             }
         }
+
     </style>
 </head>
 
 <body>
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+
 <div class="app-shell">
 
     <!-- SIDEBAR -->
+
     <aside class="sidebar">
         <div class="sidebar-brand">
             <a href="/dashboard" class="brand-link">
                 <div class="brand-logo">
+
+                    <img src="{{ url_for('static', filename='images/healthcare-support-pilot.png') }}"
+                        alt="Healthcare Support Pilot">
+                </div>
+
+
                     <img
                         src="{{ url_for('static', filename='images/healthcare-support-pilot.png') }}"
                         alt="Healthcare Support Pilot"
                     >
                 </div>
+
                 <div class="brand-text">
                     <div class="brand-title">HEALTHCARE</div>
                     <div class="brand-title">SUPPORTPILOT</div>
@@ -303,6 +909,20 @@
             <div class="nav-label">WORKSPACE</div>
 
             <a href="/dashboard" class="sidebar-link">
+
+                <i class="fa-solid fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="/ticket" class="sidebar-link">
+                <i class="fa-solid fa-ticket"></i>
+                <span>Tickets</span>
+            </a>
+
+
+            <a href="/agents" class="sidebar-link active" aria-current="page">
+                <i class="fa-solid fa-diagram-project"></i>
+
                 <span>Dashboard</span>
             </a>
 
@@ -315,10 +935,1556 @@
             </a>
 
             <a href="/agents" class="sidebar-link active" aria-current="page">
+
                 <span>AI Agents</span>
             </a>
 
             <a href="/analytics" class="sidebar-link">
+
+                <i class="fa-solid fa-chart-simple"></i>
+                <span>Analytics</span>
+            </a>
+
+            <a href="/integrations" class="sidebar-link">
+                <i class="fa-solid fa-plug"></i>
+                <span>Integrations</span>
+            </a>
+        </div>
+
+        <div class="sidebar-bottom mb-5">
+            <a href="/settings" class="sidebar-link">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </a>
+
+            <a href="/logout" class="sidebar-link">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+        <div class="sidebar-user-profile mt-5" aria-label="Signed-in user">
+                    <div class="sidebar-user-avatar" aria-hidden="true">
+                        {{ sidebar_user_initial|default('U') }}
+                    </div>
+
+                    <div class="sidebar-user-details">
+                        <div class="sidebar-user-name">
+                            {{ sidebar_username|default('Signed-in user') }}
+                        </div>
+                        <div class="sidebar-user-status">Signed in</div>
+                    </div>
+                </div>
+    </aside>
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+    <main class="main">
+
+        <!-- TOP BAR -->
+        <header class="topbar">
+            <div>
+                <h1 class="page-title">Multi-Agent Workflow</h1>
+                <div class="page-subtitle">
+                    Healthcare Support Pilot · Intelligent Operations Center
+                </div>
+            </div>
+
+            <div class="system-status">
+                <span class="status-dot"></span>
+                System Online
+            </div>
+        </header>
+
+        <div class="content">
+
+            <!-- HERO -->
+            <section class="hero-banner">
+                <div class="hero-content">
+                    <div class="hero-eyebrow">MILESTONE 3</div>
+                    <h2>AI Agent Orchestration</h2>
+                    <p>
+                        Run a coordinated support workflow that classifies
+                        an operational issue, retrieves relevant knowledge,
+                        prepares a response, validates the result, and
+                        recommends the next action.
+                    </p>
+                </div>
+
+                <div class="agent-hero-icon">
+                    <i class="fa-solid fa-diagram-project"></i>
+                </div>
+            </section>
+
+            <!-- STATISTICS -->
+            <div class="row g-3 stats-row mb-4">
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                        <div>
+                            <div class="stat-label">Workflow Agents</div>
+                            <div class="stat-value">5</div>
+                            <div class="agent-stat-note">
+                                Coordinated processing stages
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-book-open"></i>
+                        </div>
+                        <div>
+                            <div class="stat-label">Knowledge Retrieval</div>
+                            <div class="stat-value">RAG</div>
+                            <div class="agent-stat-note">
+                                Evidence-backed responses
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </div>
+                        <div>
+                            <div class="stat-label">Safety Control</div>
+                            <div class="stat-value">Human Review</div>
+                            <div class="agent-stat-note">
+                                Escalation when required
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- =================================================
+                 WORKSPACE
+            ================================================== -->
+
+            <div class="agent-workspace-grid">
+
+                <!-- LEFT COLUMN -->
+                <div class="agent-left-column">
+
+                    <!-- INPUT CARD -->
+                    <section class="main-card">
+                        <div class="card-header-custom">
+                            <h2>Run Agent Workflow</h2>
+                            <p>
+                                Enter an operational support issue to begin.
+                            </p>
+                        </div>
+
+                        <div class="card-body-custom">
+                            <form id="agent-form">
+
+                                <div class="mb-3">
+                                    <label for="ticket-id" class="form-label">
+                                        Existing Support Ticket ID
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        inputmode="numeric"
+                                        pattern="[1-9][0-9]*"
+                                        autocomplete="off"
+                                        class="form-control"
+                                        id="ticket-id"
+                                        name="ticket_id"
+                                        placeholder="Enter the ticket ID (e.g. 74)"
+                                        required
+                                    >
+
+                                    <div class="d-flex justify-content-between mt-2">
+                                        <small class="text-muted">
+                                            Enter a ticket already submitted in the support system.
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="safety-notice mt-3">
+                                    <div class="safety-icon">
+                                        <i class="fa-solid fa-shield-heart"></i>
+                                    </div>
+                                    <div>
+                                        <strong>Operational Support Only</strong>
+                                        <p>
+                                            Do not enter patient-identifying
+                                            information. This system is not
+                                            for diagnosis, treatment, medication,
+                                            or emergency medical advice.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div id="form-message" class="agent-message mt-3" role="alert" aria-live="polite"></div>
+
+                                <div class="agent-actions mt-4">
+                                    <button type="submit" class="submit-btn agent-primary-btn" id="run-button">
+                                        <i class="fa-solid fa-play"></i>
+                                        Run Agent Workflow
+                                    </button>
+
+                                    <button type="button" class="agent-secondary-btn" id="clear-button">
+                                        <i class="fa-solid fa-rotate-left"></i>
+                                        Clear
+                                    </button>
+                                </div>
+
+                            </form>
+                            <div class="safety-notice mt-3">
+                                    <div class="safety-icon">
+                                        <i class="fa-solid fa-user-gear"></i>
+                                    </div>
+                                    <div>
+                                        <strong>To Escalate for Human Review run agents for 3 times</strong>
+
+                                    </div>
+                                </div>
+                        </div>
+                    </section>
+
+                    <!-- WORKFLOW STAGES -->
+                    <section class="main-card">
+                        <div class="card-header-custom">
+                            <h2>Workflow Stages</h2>
+                            <p>
+                                Five agents coordinate to recommend an action.
+                            </p>
+                        </div>
+
+                        <div class="card-body-custom">
+
+                            <div class="agent-stage">
+                                <div class="agent-step-icon">
+                                    <i class="fa-solid fa-brain"></i>
+                                </div>
+                                <div>
+                                    <h3>1. Diagnosis Agent</h3>
+                                    <p>
+                                        Classifies the issue and reports
+                                        prediction confidence for information only.
+                                        This score does not independently trigger escalation.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="agent-stage">
+                                <div class="agent-step-icon">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                </div>
+                                <div>
+                                    <h3>2. Retrieval Agent</h3>
+                                    <p>
+                                        Searches the knowledge base for
+                                        relevant operational evidence.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="agent-stage">
+                                <div class="agent-step-icon">
+                                    <i class="fa-solid fa-file-circle-check"></i>
+                                </div>
+                                <div>
+                                    <h3>3. Resolution Agent</h3>
+                                    <p>
+                                        Prepares a response using relevant
+                                        retrieved knowledge.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="agent-stage">
+                                <div class="agent-step-icon">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                </div>
+                                <div>
+                                    <h3>4. Validation Agent</h3>
+                                    <p>
+                                        Checks confidence, evidence, and
+                                        escalation requirements.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="agent-stage">
+                                <div class="agent-step-icon">
+                                    <i class="fa-solid fa-route"></i>
+                                </div>
+                                <div>
+                                    <h3>5. Action Agent</h3>
+                                    <p>
+                                        Recommends whether to continue
+                                        or escalate to human support.
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </section>
+
+                </div>
+
+                <!-- RIGHT COLUMN -->
+                <div class="agent-right-column">
+
+                    <section class="main-card">
+                        <div class="card-header-custom">
+                            <h2>Workflow Results</h2>
+                            <p>
+                                Review the outcome, evidence, and recommended action.
+                            </p>
+                        </div>
+
+                        <div class="card-body-custom">
+
+                            <!-- EMPTY STATE -->
+                            <div id="empty-state" class="text-center py-5">
+                                <div class="agent-empty-icon mx-auto mb-3">
+                                    <i class="fa-solid fa-diagram-project"></i>
+                                </div>
+                                <h3 class="h5">Ready to process an issue</h3>
+                                <p class="text-muted mb-0">
+                                    Run the workflow to see agent results here.
+                                </p>
+                            </div>
+
+                            <!-- RESULTS -->
+                            <div id="results" hidden>
+
+                                <div id="final-confidence-container" class="mt-3 mb-3" hidden>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-muted">Final AI confidence</span>
+                                        <strong id="final-confidence-value">—</strong>
+                                    </div>
+                                    <div class="progress mt-2" style="height: 10px;">
+                                        <div
+                                            id="final-confidence-bar"
+                                            class="progress-bar"
+                                            role="progressbar"
+                                            style="width: 0%"
+                                            aria-valuemin="0"
+                                            aria-valuemax="100"
+                                            aria-valuenow="0">
+                                        </div>
+                                    </div>
+                                    <small id="final-confidence-note" class="text-muted"></small>
+                                </div>
+
+                                <!-- FINAL ACTION -->
+
+                                <div class="agent-summary">
+                                    <div>
+                                        <div class="agent-summary-label">
+                                            FINAL WORKFLOW DECISION
+                                        </div>
+                                        <h3 id="final-action">Pending</h3>
+                                        <p id="final-summary" class="agent-summary-message"></p>
+                                    </div>
+
+                                    <span id="final-status" class="agent-status">
+                                        Waiting
+                                    </span>
+                                </div>
+
+                                <div class="row g-3 mt-3 integration-status-grid">
+
+                                    <!-- Jira status card -->
+                                    <div class="col-12 col-lg-6">
+                                        <section
+                                            id="jira-result"
+                                            class="card h-100 border-0 shadow-sm"
+                                            style="border-radius: 14px; background: #f8fafc;">
+
+                                            <div class="card-body p-4">
+                                                <div class="d-flex justify-content-between
+                                                            align-items-start mb-3">
+                                                    <div>
+                                                        <div class="agent-summary-label">
+                                                            JIRA INTEGRATION
+                                                        </div>
+                                                        <h6 class="fw-bold mb-0">
+                                                            Issue tracking
+                                                        </h6>
+                                                    </div>
+
+                                                    <span
+                                                        id="jira-status-badge"
+                                                        class="badge text-bg-secondary">
+                                                        UNKNOWN
+                                                    </span>
+                                                </div>
+
+                                                <p
+                                                    id="jira-sync-status"
+                                                    class="text-muted mb-3">
+                                                    Checking Jira status...
+                                                </p>
+
+                                                <a
+                                                    id="jira-issue-link"
+                                                    href="#"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    hidden>
+                                                    Open Jira issue
+                                                </a>
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <!-- Email status card -->
+                                    <div class="col-12 col-lg-6">
+                                        <section
+                                            id="email-notification-result"
+                                            class="card h-100 border-0 shadow-sm"
+                                            style="border-radius: 14px; background: #f8fafc;">
+
+                                            <div class="card-body p-4">
+                                                <div class="d-flex justify-content-between
+                                                            align-items-start mb-3">
+                                                    <div>
+                                                        <div class="agent-summary-label">
+                                                            EMAIL NOTIFICATION
+                                                        </div>
+                                                        <h6 class="fw-bold mb-0">
+                                                            Requester notification
+                                                        </h6>
+                                                    </div>
+
+                                                    <span
+                                                        id="email-notification-badge"
+                                                        class="badge text-bg-secondary">
+                                                        UNKNOWN
+                                                    </span>
+                                                </div>
+
+                                                <div class="small text-muted mb-1">
+                                                    Recipient
+                                                </div>
+
+                                                <div
+                                                    id="email-notification-recipient"
+                                                    class="fw-semibold text-break mb-3">
+                                                    Registered email not available
+                                                </div>
+
+                                                <p
+                                                    id="email-notification-status"
+                                                    class="text-muted mb-1">
+                                                    Checking email status...
+                                                </p>
+
+                                                <small
+                                                    id="email-notification-sent-at"
+                                                    class="text-muted">
+                                                </small>
+                                            </div>
+                                        </section>
+                                    </div>
+                                </div>
+
+
+                                <!-- DIAGNOSIS -->
+                                <div class="agent-result-step border-top">
+                                    <div class="agent-step-icon">
+                                        <i class="fa-solid fa-brain"></i>
+                                    </div>
+
+                                    <div class="agent-result-content">
+                                        <div class="agent-result-heading">
+                                            <h3>Diagnosis Agent</h3>
+                                            <span id="diagnosis-status" class="agent-status">Waiting</span>
+                                        </div>
+
+                                        <div id="diagnosis-output" class="agent-output"></div>
+
+                                        <div id="confidence-container" hidden>
+                                            <div class="d-flex justify-content-between mt-3">
+                                                <small class="text-muted">
+                                                    Classification confidence
+                                                </small>
+                                                <strong id="confidence-value">—</strong>
+                                            </div>
+
+                                            <div class="agent-progress-track">
+                                                <div id="confidence-bar" class="agent-progress-fill"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- RETRIEVAL -->
+                                <div class="agent-result-step">
+                                    <div class="agent-step-icon">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                    </div>
+
+                                    <div class="agent-result-content">
+                                        <div class="agent-result-heading">
+                                            <h3>Retrieval Agent</h3>
+                                            <span id="retrieval-status" class="agent-status">Waiting</span>
+                                        </div>
+
+                                        <div id="retrieval-output" class="agent-output"></div>
+
+                                        <div id="evidence-list"></div>
+                                    </div>
+                                </div>
+
+                                <!-- RESOLUTION -->
+                                <div class="agent-result-step">
+                                    <div class="agent-step-icon">
+                                        <i class="fa-solid fa-file-circle-check"></i>
+                                    </div>
+
+                                    <div class="agent-result-content">
+                                        <div class="agent-result-heading">
+                                            <h3>Resolution Agent</h3>
+                                            <span id="resolution-status" class="agent-status">Waiting</span>
+                                        </div>
+
+                                        <div id="resolution-output" class="agent-output"></div>
+                                    </div>
+                                </div>
+
+                                <!-- VALIDATION -->
+                                <div class="agent-result-step">
+                                    <div class="agent-step-icon">
+                                        <i class="fa-solid fa-shield-halved"></i>
+                                    </div>
+
+                                    <div class="agent-result-content">
+                                        <div class="agent-result-heading">
+                                            <h3>Validation Agent</h3>
+                                            <span id="validation-status" class="agent-status">Waiting</span>
+                                        </div>
+
+                                        <button class="agent-detail-toggle" type="button"
+                                            data-detail-target="validation-details" aria-expanded="false">
+                                            <i class="fa-solid fa-chevron-down"></i>
+                                            View validation details
+                                        </button>
+
+                                        <div id="validation-details" class="agent-detail-content" hidden>
+                                            <div id="validation-output" class="agent-output"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- ACTION -->
+                                <div class="agent-result-step">
+                                    <div class="agent-step-icon">
+                                        <i class="fa-solid fa-route"></i>
+                                    </div>
+
+                                    <div class="agent-result-content">
+                                        <div class="agent-result-heading">
+                                            <h3>Action Agent</h3>
+                                            <span id="action-status" class="agent-status">Waiting</span>
+                                        </div>
+
+                                        <div id="action-summary" class="agent-output"></div>
+
+                                        <button class="agent-detail-toggle" type="button"
+                                            data-detail-target="action-details" aria-expanded="false">
+                                            <i class="fa-solid fa-chevron-down"></i>
+                                            View action details
+                                        </button>
+
+                                        <div id="action-details" class="agent-detail-content" hidden>
+                                            <div id="action-output" class="agent-output"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- HUMAN OVERSIGHT -->
+                    <div class="agent-oversight">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <div>
+                            <strong>Human oversight</strong>
+                            <p>
+                                A generated response does not prove that an
+                                issue is resolved. Follow the recommended
+                                action and the existing escalation policy.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
+    <script>
+        "use strict";
+
+        const form = document.getElementById("agent-form");
+       const ticketInput = document.getElementById("ticket-id");
+        const runButton = document.getElementById("run-button");
+        const clearButton = document.getElementById("clear-button");
+        const messageBox = document.getElementById("form-message");
+        const emptyState = document.getElementById("empty-state");
+        const resultsPanel = document.getElementById("results");
+
+
+        /* -----------------------------------------------------
+           GENERAL HELPERS
+        ----------------------------------------------------- */
+
+        function showMessage(message, type = "info") {
+            messageBox.textContent = message;
+            messageBox.className = `agent-message visible ${type}`;
+        }
+
+        function hideMessage() {
+            messageBox.textContent = "";
+            messageBox.className = "agent-message";
+        }
+
+        function setText(id, value, fallback = "No details returned.") {
+            const element = document.getElementById(id);
+
+            if (!element) return;
+
+            element.textContent =
+                value === null || value === undefined || value === ""
+                    ? fallback
+                    : String(value);
+        }
+
+        function displayValue(object, keys, fallback = "") {
+            if (!object || typeof object !== "object") {
+                return fallback;
+            }
+
+            for (const key of keys) {
+                if (object[key] !== undefined && object[key] !== null) {
+                    return object[key];
+                }
+            }
+
+            return fallback;
+        }
+
+        function formatDetails(value) {
+            if (value === null || value === undefined || value === "") {
+                return "No details returned.";
+            }
+
+            if (typeof value === "string") {
+                return value;
+            }
+
+            return JSON.stringify(value, null, 2);
+        }
+
+        function setStatus(id, label, type = "") {
+            const element = document.getElementById(id);
+
+            if (!element) return;
+
+            element.textContent = label || "Completed";
+            element.className = "agent-status";
+
+            if (type) {
+                element.classList.add(type);
+            }
+        }
+
+        function getAgentStatus(agent, fallback = "Completed") {
+            if (!agent || typeof agent !== "object") {
+                return fallback;
+            }
+
+            if (agent.error) return "Needs attention";
+
+            if (agent.success === false) return "Needs attention";
+
+            if (agent.requires_escalation === true) return "Escalation required";
+
+            if (agent.approved === false) return "Not approved";
+
+            return displayValue(agent, ["status"], fallback);
+        }
+
+        function getStatusType(agent) {
+            if (!agent || typeof agent !== "object") return "";
+
+            if (agent.error || agent.success === false ||
+                agent.approved === false) {
+                return "error";
+            }
+
+            if (agent.requires_escalation === true) {
+                return "warning";
+            }
+
+            return "success";
+        }
+
+        /* -----------------------------------------------------
+           EVIDENCE RENDERING
+        ----------------------------------------------------- */
+
+        function renderEvidence(evidence) {
+            const container = document.getElementById("evidence-list");
+            container.replaceChildren();
+
+            if (!Array.isArray(evidence) || evidence.length === 0) {
+                return;
+            }
+
+            const heading = document.createElement("div");
+            heading.className = "agent-section-label mt-3";
+            heading.textContent = `RETRIEVED EVIDENCE (${evidence.length})`;
+            container.appendChild(heading);
+
+            evidence.forEach((item, index) => {
+                const record = item && typeof item === "object" ? item : {};
+
+                const card = document.createElement("div");
+                card.className = "agent-evidence";
+
+                const title = document.createElement("div");
+                title.className = "agent-evidence-title";
+                title.textContent = displayValue(
+                    record,
+                    ["title", "name", "source"],
+                    `Evidence ${index + 1}`
+                );
+                card.appendChild(title);
+
+                const category = displayValue(
+                    record,
+                    ["category", "type"],
+                    ""
+                );
+
+                const rawScore = displayValue(
+                    record,
+                    ["score", "relevance_score", "similarity"],
+                    null
+                );
+
+                const meta = document.createElement("div");
+                meta.className = "agent-evidence-meta";
+
+                const parts = [];
+
+                if (category) {
+                    parts.push(String(category));
+                }
+
+                if (rawScore !== null && Number.isFinite(Number(rawScore))) {
+                    const score = Number(rawScore);
+
+                    // Retrieval results typically use 0–1 similarity scores.
+                    const percentage =
+                        score >= 0 && score <= 1
+                            ? score * 100
+                            : score;
+
+                    const bounded = Math.min(100, Math.max(0, percentage));
+
+                    parts.push(`Relevance: ${bounded.toFixed(1)}%`);
+                }
+
+                meta.textContent = parts.join(" · ");
+                card.appendChild(meta);
+
+                const content = displayValue(
+                    record,
+                    ["content", "text", "excerpt", "snippet"],
+                    ""
+                );
+
+                if (content) {
+                    const body = document.createElement("p");
+                    body.className = "agent-evidence-body";
+                    body.textContent = String(content);
+                    card.appendChild(body);
+                }
+
+                const url = displayValue(
+                    record,
+                    ["source_url", "url"],
+                    ""
+                );
+
+
+                if (typeof url === "string" && /^https?:\/\//i.test(url)) {
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.target = "_blank";
+                    link.rel = "noopener noreferrer";
+                    link.textContent = "Open source";
+                    link.className = "d-inline-block mt-2";
+                    link.style.fontSize = "12px";
+                    card.appendChild(link);
+                }
+
+                container.appendChild(card);
+            });
+        }
+
+        /* -----------------------------------------------------
+           RENDER AGENT WORKFLOW
+        ----------------------------------------------------- */
+
+        function renderResults(data) {
+            const diagnosis = data.diagnosis || {};
+            const retrieval = data.retrieval || {};
+            const resolution = data.resolution || {};
+            const validation = data.validation || {};
+            const action = data.action_result || data.action || {};
+
+            const finalConfidenceRaw =
+                validation.final_confidence ?? validation.confidence;
+
+            const finalConfidence = Number(finalConfidenceRaw);
+            const finalConfidenceContainer = document.getElementById(
+                "final-confidence-container"
+            );
+
+            if (
+                finalConfidenceRaw !== undefined &&
+                finalConfidenceRaw !== null &&
+                Number.isFinite(finalConfidence) &&
+                finalConfidence >= 0 &&
+                finalConfidence <= 100
+            ) {
+                finalConfidenceContainer.hidden = false;
+
+                document.getElementById("final-confidence-value").textContent =
+                    `${finalConfidence.toFixed(2)}%`;
+
+                const confidenceBar = document.getElementById("final-confidence-bar");
+                confidenceBar.style.width = `${finalConfidence}%`;
+                confidenceBar.setAttribute("aria-valuenow", String(finalConfidence));
+
+                const threshold = 70;
+                const approved = validation.approved === true;
+                const escalated =
+                    data.requires_escalation === true ||
+                    action.requires_escalation === true ||
+                    String(action.action || data.status || "")
+                        .toUpperCase()
+                        .includes("ESCALATE");
+
+                confidenceBar.classList.toggle(
+                    "bg-success",
+                    approved && !escalated && finalConfidence >= threshold
+                );
+                confidenceBar.classList.toggle(
+                    "bg-warning",
+                    !approved || escalated || finalConfidence < threshold
+                );
+
+                document.getElementById("final-confidence-note").textContent =
+                    `Minimum confidence: ${threshold}%. ` +
+                    (
+                        approved && !escalated && finalConfidence >= threshold
+                            ? "Confidence threshold met; validation approved."
+                            : "Human review is required by the workflow decision."
+                    );
+            } else {
+                finalConfidenceContainer.hidden = true;
+            }
+
+
+            emptyState.hidden = true;
+            resultsPanel.hidden = false;
+
+               /* Jira issue result */
+
+            /* Jira and email integration status cards */
+
+            const jiraResult = document.getElementById("jira-result");
+            // Keep the Jira status card visible for every workflow outcome.
+            jiraResult.hidden = false;
+            jiraResult.style.display = "";
+            const jiraLink = document.getElementById("jira-issue-link");
+            const jiraStatus = document.getElementById("jira-sync-status");
+            const jiraBadge = document.getElementById("jira-status-badge");
+
+            const emailBadge = document.getElementById(
+                "email-notification-badge"
+            );
+            const emailStatusText = document.getElementById(
+                "email-notification-status"
+            );
+            const emailRecipient = document.getElementById(
+                "email-notification-recipient"
+            );
+            const emailSentAt = document.getElementById(
+                "email-notification-sent-at"
+            );
+
+            /* Jira status */
+            const jiraKey = data.jira_issue_key;
+            const jiraUrl = data.jira_issue_url;
+            let jiraState = String(
+                data.jira_sync_status || "UNKNOWN"
+            ).toUpperCase();
+
+            if (data.status === "AUTO_RESOLVE" && !jiraKey) {
+                jiraState = "NOT_REQUIRED";
+            }
+
+            const jiraBadgeStyles = {
+                SYNCED: "badge text-bg-success",
+                NOT_REQUIRED: "badge text-bg-info",
+                NOT_CONFIGURED: "badge text-bg-secondary",
+                FAILED: "badge text-bg-danger",
+                PENDING: "badge text-bg-warning"
+            };
+
+            jiraBadge.className =
+                jiraBadgeStyles[jiraState] || "badge text-bg-secondary";
+
+            jiraBadge.textContent = jiraState.replaceAll("_", " ");
+
+            jiraLink.hidden = true;
+            jiraLink.removeAttribute("href");
+
+            if (
+                jiraState === "SYNCED" &&
+                typeof jiraKey === "string" &&
+                typeof jiraUrl === "string"
+            ) {
+                try {
+                    const parsedUrl = new URL(jiraUrl);
+
+                    if (
+                        parsedUrl.protocol === "https:" &&
+                        parsedUrl.hostname === "shivamsupportpilot.atlassian.net"
+                    ) {
+                        jiraLink.href = parsedUrl.href;
+                        jiraLink.textContent = `Open Jira issue ${jiraKey}`;
+                        jiraLink.hidden = false;
+                        jiraStatus.textContent =
+                            `Issue ${jiraKey} is synchronized successfully.`;
+                    } else {
+                        jiraStatus.textContent =
+                            "The Jira URL did not pass validation.";
+                    }
+                } catch {
+                    jiraStatus.textContent = "The Jira URL is invalid.";
+                }
+            } else if (jiraState === "NOT_REQUIRED") {
+                jiraStatus.textContent =
+                    "No Jira issue is required for this auto-resolved ticket.";
+            } else if (jiraState === "NOT_CONFIGURED") {
+                jiraStatus.textContent =
+                    "Jira integration is not configured.";
+            } else if (jiraState === "FAILED") {
+                jiraStatus.textContent =
+                    "Jira synchronization failed. Check the Flask logs.";
+            } else if (jiraState === "PENDING") {
+                jiraStatus.textContent =
+                    "Jira synchronization is pending.";
+            } else {
+                jiraStatus.textContent = `Jira status: ${jiraState}`;
+            }
+
+            /* Email notification status */
+            const emailState = String(
+                data.email_notification_status || "UNKNOWN"
+            ).toUpperCase();
+
+            const emailBadgeStyles = {
+                SENT: "badge text-bg-success",
+                PENDING: "badge text-bg-warning",
+                FAILED: "badge text-bg-danger",
+                NOT_CONFIGURED: "badge text-bg-secondary",
+                UNKNOWN: "badge text-bg-secondary"
+            };
+
+            emailBadge.className =
+                emailBadgeStyles[emailState] || "badge text-bg-secondary";
+
+            emailBadge.textContent = emailState.replaceAll("_", " ");
+
+            emailRecipient.textContent =
+                data.email_recipient || "Registered email not available";
+
+            const emailMessages = {
+                SENT: "SMTP accepted the notification for sending.",
+                PENDING: "Email notification is pending.",
+                FAILED: "Email sending failed. Check SMTP settings and Flask logs.",
+                NOT_CONFIGURED:
+                    "Email was not sent. Check the registered address and SMTP configuration.",
+                UNKNOWN:
+                    "The server did not return an email notification status."
+            };
+
+            emailStatusText.textContent =
+                emailMessages[emailState] ||
+                `Email notification status: ${emailState}`;
+
+            emailSentAt.textContent =
+                emailState === "SENT" && data.email_notification_sent_at
+                    ? `Recorded sent time: ${data.email_notification_sent_at}`
+                    : "";
+            /* Final action */
+
+
+            const agentRecommendation = String(
+                displayValue(
+                    action,
+                    ["action", "recommended_action", "decision"],
+                    "Review required"
+                )
+            );
+
+            const finalDecision = data.requires_escalation === true
+                ? "ESCALATE"
+                : String(
+                    displayValue(
+                        data,
+                        ["status", "action"],
+                        agentRecommendation
+                    )
+                );
+
+            setText("final-action", finalDecision);
+
+
+            const actionMessageText =
+                data.message ||
+                action.message ||
+                "The workflow has completed its decision.";
+
+            // Define the escalation reasons BEFORE using them.
+            const actionReasonList =
+                Array.isArray(data.escalation_reasons) &&
+                data.escalation_reasons.length > 0
+                    ? data.escalation_reasons
+                    : Array.isArray(action.reasons)
+                        ? action.reasons
+                        : Array.isArray(action.reason)
+                            ? action.reason
+                            : [];
+
+            // Convert reason codes into readable text.
+            const readableReasons = actionReasonList.map(reason =>
+                String(reason)
+                    .replaceAll("_", " ")
+                    .replace(/^./, character => character.toUpperCase())
+            );
+
+            // Show the final escalation reason under FINAL WORKFLOW DECISION.
+            const finalSummaryText =
+                data.requires_escalation === true
+                    ? (
+                        readableReasons.length > 0
+                            ? `Human review is required. Reason${
+                                readableReasons.length > 1 ? "s" : ""
+                            }: ${readableReasons.join("; ")}.`
+                            : (data.message || "Human review is required.")
+                    )
+                    : (
+                        data.message ||
+                        action.message ||
+                        "The workflow has completed its decision."
+                    );
+
+            setText("final-summary", finalSummaryText);
+
+            const readableActionOutput = [
+                `Final decision: ${finalDecision.replaceAll("_", " ")}`,
+                ...(agentRecommendation.toUpperCase() !== finalDecision.toUpperCase()
+                    ? [
+                        `Action Agent recommendation: ${
+                            agentRecommendation.replaceAll("_", " ")
+                        }`
+                    ]
+                    : []),
+                actionMessageText,
+                ...actionReasonList.map(reason => `Reason: ${reason}`)
+            ];
+
+            setText("action-output", readableActionOutput.join("\n"));
+            setText("action-summary", actionMessageText);
+
+
+
+            setText(
+                "diagnosis-output",
+                `Predicted category: ${
+                    displayValue(
+                        diagnosis,
+                        ["category", "predicted_category"],
+                        "Unknown"
+                    )
+                }`
+            );
+
+
+            const actionText = String(finalDecision).toUpperCase();
+
+            let finalType = "success";
+
+            if (
+                data.requires_escalation === true ||
+                actionText.includes("ESCALATE")
+            ) {
+                finalType = "warning";
+            } else if (data.error || action.success === false) {
+                finalType = "error";
+            }
+
+            setStatus(
+                "final-status",
+                displayValue(data, ["status"], "Workflow completed"),
+                finalType
+            );
+
+            /* Diagnosis */
+
+            setStatus(
+                "diagnosis-status",
+                getAgentStatus(diagnosis),
+                getStatusType(diagnosis)
+            );
+
+
+
+            const confidenceRaw = Number(diagnosis.confidence);
+            const confidenceContainer =
+                document.getElementById("confidence-container");
+
+            if (diagnosis.confidence !== undefined &&
+                diagnosis.confidence !== null &&
+                Number.isFinite(confidenceRaw)) {
+
+                // classifier.py returns confidence on a 0–100 scale.
+                const confidence = Math.min(
+                    100,
+                    Math.max(0, confidenceRaw)
+                );
+
+                confidenceContainer.hidden = false;
+
+                setText(
+                    "confidence-value",
+                    `${confidence.toFixed(2)}%`
+                );
+
+                document.getElementById("confidence-bar").style.width =
+                    `${confidence}%`;
+            } else {
+                confidenceContainer.hidden = true;
+            }
+
+            /* Retrieval */
+
+            setStatus(
+                "retrieval-status",
+                getAgentStatus(retrieval),
+                getStatusType(retrieval)
+            );
+
+            const evidence = displayValue(
+                retrieval,
+                ["evidence", "results"],
+                []
+            );
+
+            const evidenceCount = Array.isArray(evidence)
+                ? evidence.length
+                : Number(retrieval.evidence_count || 0);
+
+            setText(
+                "retrieval-output",
+                displayValue(
+                    retrieval,
+                    ["message", "summary"],
+                    `Retrieved ${evidenceCount} knowledge record(s).`
+                )
+            );
+
+            renderEvidence(evidence);
+
+            /* Resolution */
+
+            setStatus(
+                "resolution-status",
+                getAgentStatus(resolution),
+                getStatusType(resolution)
+            );
+
+            const resolutionText = displayValue(
+                resolution,
+                ["resolution", "response", "answer", "message"],
+                ""
+            );
+
+            setText(
+                "resolution-output",
+                typeof resolutionText === "string"
+                ? resolutionText
+                : resolutionText && typeof resolutionText === "object"
+                    ? displayValue(
+                        resolutionText,
+                        ["resolution", "response", "answer", "message", "summary"],
+                        "Resolution details are unavailable."
+                    )
+                    : resolutionText,
+                "No resolution text was returned."
+            );
+
+            /* Validation */
+
+            setStatus(
+                "validation-status",
+                getAgentStatus(validation),
+                getStatusType(validation)
+            );
+
+
+            const validationConfidence = Number(
+                validation.final_confidence ?? validation.confidence
+            );
+
+            const validationReasons = Array.isArray(validation.reasons)
+                ? validation.reasons
+                : [];
+
+            const validationSummary = [];
+
+            if (Number.isFinite(validationConfidence)) {
+                validationSummary.push(
+                    `Final confidence: ${validationConfidence.toFixed(2)}%`
+                );
+            }
+
+            validationSummary.push(
+                `Validation: ${validation.approved === true ? "Approved" : "Not approved"}`
+            );
+
+            if (validation.evidence_count !== undefined) {
+                validationSummary.push(
+                    `Evidence records: ${validation.evidence_count}`
+                );
+            }
+
+            if (validationReasons.length) {
+                validationSummary.push(
+                    `Reason: ${validationReasons.join("; ")}`
+                );
+            }
+
+            setText("validation-output", validationSummary.join("\n"));
+
+
+            /* Action */
+
+            const displayAgentRecommendation = String(
+                displayValue(
+                    action,
+                    ["action", "recommended_action", "decision", "status"],
+                    "Review required"
+                )
+            );
+
+            const displayFinalDecisionRaw =
+                data.requires_escalation === true
+                    ? "ESCALATE"
+                    : String(
+                        displayValue(
+                            data,
+                            ["status", "action"],
+                            displayAgentRecommendation
+                        )
+                    );
+
+            const displayFinalDecision =
+                displayFinalDecisionRaw.replaceAll("_", " ");
+
+            const normalizedRecommendation =
+                displayAgentRecommendation.replaceAll("_", " ").toUpperCase();
+
+            const displayActionMessage =
+                data.message ||
+                action.message ||
+                "Review the workflow result before resolving the ticket.";
+
+            const displayActionReasons =
+                Array.isArray(data.escalation_reasons) &&
+                data.escalation_reasons.length > 0
+                    ? data.escalation_reasons
+                    : Array.isArray(action.reasons)
+                        ? action.reasons
+                        : Array.isArray(action.reason)
+                            ? action.reason
+                            : [];
+
+            const displayActionLines = [
+                `Final decision: ${displayFinalDecision}`,
+                ...(normalizedRecommendation !== displayFinalDecision.toUpperCase()
+                    ? [
+                        `Action Agent recommendation: ${
+                            displayAgentRecommendation.replaceAll("_", " ")
+                        }`
+                    ]
+                    : []),
+                displayActionMessage,
+                ...displayActionReasons.map(reason =>
+                    `Reason: ${typeof reason === "string" ? reason : String(reason)}`
+                )
+            ];
+
+            setText("action-output", displayActionLines.join("\n"));
+            setText("action-summary", displayActionMessage);
+            setStatus("action-status", displayFinalDecision, finalType);
+
+
+        }
+
+
+        /* -----------------------------------------------------
+           RESET RESULTS
+        ----------------------------------------------------- */
+
+        function resetResults() {
+            resultsPanel.hidden = true;
+            emptyState.hidden = false;
+
+            const jiraResult = document.getElementById("jira-result");
+            const jiraLink = document.getElementById("jira-issue-link");
+
+
+            jiraLink.removeAttribute("href");
+            jiraLink.textContent = "Open Jira issue";
+            document.getElementById("jira-sync-status").textContent = "";
+
+            [
+                "final-action",
+                "final-summary",
+                "diagnosis-output",
+                "retrieval-output",
+                "resolution-output",
+                "validation-output",
+                "action-output",
+                "action-summary"
+            ].forEach(id => {
+                document.getElementById(id).textContent = "";
+            });
+
+            document.getElementById("evidence-list").replaceChildren();
+
+            [
+                "final-status",
+                "diagnosis-status",
+                "retrieval-status",
+                "resolution-status",
+                "validation-status",
+                "action-status"
+            ].forEach(id => {
+                setStatus(id, "Waiting");
+            });
+
+            document.getElementById("confidence-container").hidden = true;
+            document.getElementById("confidence-bar").style.width = "0%";
+
+            document.querySelectorAll(".agent-detail-content").forEach(panel => {
+                panel.hidden = true;
+            });
+
+            document.querySelectorAll("[data-detail-target]").forEach(button => {
+                button.setAttribute("aria-expanded", "false");
+
+                const icon = button.querySelector("i");
+                if (icon) {
+                    icon.className = "fa-solid fa-chevron-down";
+                }
+
+                const label = button.dataset.closedLabel;
+                if (label) {
+                    button.lastChild.textContent = ` ${label}`;
+                }
+            });
+        }
+
+        /* -----------------------------------------------------
+           FORM SUBMISSION
+        ----------------------------------------------------- */
+
+        form.addEventListener("submit", async event => {
+            event.preventDefault();
+            hideMessage();
+
+            const ticketId = ticketInput.value.trim();
+
+            if (!ticketId || !/^[1-9]\d*$/.test(ticketId)) {
+                showMessage(
+                    "Please enter a valid positive support ticket ID.",
+                    "error"
+                );
+                ticketInput.focus();
+                return;
+            }
+
+            runButton.disabled = true;
+            clearButton.disabled = true;
+
+            runButton.innerHTML =
+                '<i class="fa-solid fa-spinner fa-spin"></i> Running Workflow...';
+
+            resetResults();
+
+            showMessage(
+                "Processing the existing ticket through the five-agent workflow.",
+                "info"
+            );
+
+            try {
+                const response = await fetch("/api/agents/run-ticket", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    credentials: "same-origin",
+                    body: JSON.stringify({
+                        ticket_id: Number(ticketId)
+                    })
+                });
+
+                const contentType =
+                    response.headers.get("content-type") || "";
+
+                if (!contentType.includes("application/json")) {
+                    if (response.status === 401 ||
+                        response.status === 403) {
+                        throw new Error(
+                            "Your session may have expired. Please sign in again."
+                        );
+                    }
+
+                    throw new Error(
+                        "The server returned an unexpected response. Check the Flask logs."
+                    );
+                }
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.error ||
+                        data.message ||
+                        "The agent workflow failed."
+                    );
+                }
+
+                renderResults(data);
+
+                showMessage(
+                    data.message || "Ticket workflow completed.",
+                    "success"
+                );
+
+            } catch (error) {
+                console.error("Agent workflow error:", error);
+
+                showMessage(
+                    error.message || "Unable to run the workflow.",
+                    "error"
+                );
+
+            } finally {
+                runButton.disabled = false;
+                clearButton.disabled = false;
+
+                runButton.innerHTML =
+                    '<i class="fa-solid fa-play"></i> Run Agent Workflow';
+            }
+        });
+
+        /* -----------------------------------------------------
+           CLEAR FORM
+        ----------------------------------------------------- */
+
+        clearButton.addEventListener("click", () => {
+            form.reset();
+
+            hideMessage();
+            resetResults();
+
+            ticketInput.focus();
+        });
+
+        /* -----------------------------------------------------
+           EXPAND / COLLAPSE DETAILS
+        ----------------------------------------------------- */
+
+        document.querySelectorAll("[data-detail-target]").forEach(button => {
+            const target = document.getElementById(
+                button.dataset.detailTarget
+            );
+
+            if (!target) return;
+
+            button.dataset.closedLabel =
+                button.textContent.trim().replace(/^.*?\s/, "") ||
+                "View details";
+
+            button.addEventListener("click", () => {
+                const expanded =
+                    button.getAttribute("aria-expanded") === "true";
+
+                button.setAttribute(
+                    "aria-expanded",
+                    String(!expanded)
+                );
+
+                target.hidden = expanded;
+
+                const icon = button.querySelector("i");
+
+                if (icon) {
+                    icon.className = expanded
+                        ? "fa-solid fa-chevron-down"
+                        : "fa-solid fa-chevron-up";
+                }
+
+                const label = expanded
+                    ? button.dataset.closedLabel
+                    : button.dataset.closedLabel.replace(
+                        /^View /,
+                        "Hide "
+                    );
+
+                button.lastChild.textContent = ` ${label}`;
+            });
+        });
+    </script>
+
+</body>
+
+</html>
+=======
                 <span>Analytics</span>
             </a>
         </div>
@@ -947,3 +3113,4 @@
 
 </body>
 </html>
+

@@ -12,6 +12,144 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tickets.css') }}">
 
     <style>
+
+        .rag-info-banner{border:1px solid #d9e5ee;background:#f7fbfd;border-radius:14px;padding:20px 22px;display:flex;gap:16px;align-items:flex-start;margin-bottom:24px}
+        .rag-info-icon{width:44px;height:44px;min-width:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#e8f4f8;color:#17758b}
+        .rag-info-banner h4{margin:0 0 5px;font-size:16px;font-weight:700}.rag-info-banner p{margin:0;color:#667786;font-size:13px;line-height:1.6}
+        .rag-workflow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+        .rag-step{border:1px solid #e2e9ee;border-radius:13px;padding:18px;background:#fff}
+        .rag-step-number{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#edf5f8;color:#17758b;font-size:12px;font-weight:700;margin-bottom:12px}
+        .rag-step-title{font-size:13px;font-weight:700;margin-bottom:6px;color:#233746}.rag-step-text{font-size:12px;line-height:1.5;color:#71808c}
+        .main-card{background:#fff;border:1px solid #e2e9ee;border-radius:14px;overflow:hidden}
+        .card-header-custom{padding:20px 22px;border-bottom:1px solid #e5ebef}.card-header-custom h2{font-size:17px;font-weight:700;color:#233746;margin:0 0 6px}.card-header-custom p{font-size:13px;color:#71808c;margin:0}
+        .card-body-custom{padding:22px}.rag-section{margin-top:28px}.rag-section-title{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:700;margin-bottom:14px;color:#233746}.rag-section-title i{color:#17758b}
+        .ticket-detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.ticket-detail-item{border:1px solid #e2e9ee;background:#fff;border-radius:11px;padding:15px}.ticket-detail-item.full-width{grid-column:1/-1}
+        .ticket-detail-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#7b8993;margin-bottom:6px}.ticket-detail-value{font-size:14px;font-weight:700;color:#263b49;word-break:break-word}.ticket-description{font-size:13px;font-weight:400;line-height:1.7;color:#435661;white-space:pre-wrap}
+        .status-badge,.priority-badge,.type-badge,.relevance-badge{display:inline-block;padding:5px 9px;border-radius:20px;font-size:10px;font-weight:700}.status-badge{background:#edf7f4;color:#26735f}.priority-badge,.type-badge{background:#f0f4f7;color:#60717c}.relevance-badge{background:#edf7f4;color:#26735f}
+        .evidence-card{border:1px solid #e2e9ee;border-radius:13px;padding:18px;background:#fff;margin-bottom:12px}.evidence-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}.evidence-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#17758b}.evidence-number{width:28px;height:28px;border-radius:8px;background:#123d70;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex:0 0 28px}.evidence-card h5{font-size:14px;font-weight:700;margin:0;color:#263b49}.evidence-card p{font-size:13px;line-height:1.6;color:#647582;margin:12px 0}.evidence-meta{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 12px}
+        .source-link{font-size:12px;color:#17758b;text-decoration:none;word-break:break-all}.source-link:hover{text-decoration:underline}
+        .context-container{background:#f7fafc;border:1px solid #e2e9ee;border-radius:11px;padding:16px;font-size:12px;line-height:1.65;color:#52636f;white-space:pre-wrap;max-height:420px;overflow:auto}
+        .resolution-container{border:1px solid #dfe8ed;border-radius:13px;background:#fbfdfe;padding:20px}
+        .resolution-block{margin-bottom:20px}.resolution-block:last-child{margin-bottom:0}.resolution-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:#17758b;margin-bottom:8px}.resolution-summary,.resolution-area{font-size:14px;line-height:1.7;color:#334955}
+        .resolution-steps{margin:0;padding-left:22px}.resolution-steps li{font-size:13px;line-height:1.7;color:#435661;margin-bottom:8px}.source-item{padding:10px 0;border-bottom:1px solid #e8eef1}.source-item:last-child{border-bottom:0}.source-title{font-size:13px;font-weight:700;color:#263b49}.source-meta{font-size:11px;color:#71808c;margin-top:3px}
+        .loading-box{display:flex;align-items:center;gap:10px;padding:18px;color:#71808c;font-size:13px}.rag-error{border:1px solid #ead6d6;background:#fff7f7;border-radius:11px;padding:16px;color:#8b4b4b;font-size:13px}
+        .empty-evidence{border:1px dashed #d8e2e7;border-radius:12px;padding:20px;text-align:center;color:#71808c;font-size:13px}
+        .workflow-complete .rag-step-number{background:#edf7f4;color:#26735f}
+        @media(max-width:900px){.rag-workflow{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.rag-workflow,.ticket-detail-grid{grid-template-columns:1fr}.ticket-detail-item.full-width{grid-column:auto}}
+        /* Customer satisfaction rating */
+.rag-satisfaction {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 14px;
+    padding: 16px 18px;
+    background: #f5f8ff;
+    border: 1px solid #dbe5f5;
+    border-radius: 12px;
+}
+
+.rag-satisfaction[hidden] {
+    display: none;
+}
+
+.rag-satisfaction-text {
+    flex: 1;
+    min-width: 200px;
+}
+
+.rag-satisfaction-title {
+    color: #243b53;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.rag-satisfaction-subtitle {
+    color: #718096;
+    font-size: 12px;
+    margin: 0;
+}
+
+.rag-rating-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.rag-rating-buttons button {
+    width: 34px;
+    height: 34px;
+    border: 1px solid #c7d5e8;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #243b53;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.rag-rating-buttons button:hover {
+    background: #e0eaff;
+    border-color: #6488cc;
+}
+
+.rag-rating-buttons button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+#rag-satisfaction-message {
+    width: 100%;
+    font-size: 12px;
+    color: #43546b;
+}
+
+
+.sidebar-user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 10px 8px;
+    padding: 14px 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    min-width: 0;
+}
+
+.sidebar-user-avatar {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.16);
+    color: inherit;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.sidebar-user-details {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.sidebar-user-name {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: inherit;
+}
+
+.sidebar-user-status {
+    margin-top: 3px;
+    font-size: 11px;
+    opacity: 0.7;
+    color: inherit;
+}
+
+    </style>
+</head>
+
         .agent-banner {
             display: flex;
             align-items: flex-start;
@@ -22,6 +160,7 @@
             border-radius: 14px;
             background: #f7fbfd;
         }
+
 
         .agent-banner-icon {
             width: 44px;
@@ -280,9 +419,16 @@
             border-radius: 12px;
         }
 
+
+        <a
+            href="/agents"
+            class="sidebar-link"
+        >
+
         .evidence-card:last-child {
             margin-bottom: 0;
         }
+
 
         .evidence-card h3 {
             font-size: 14px;
@@ -401,8 +547,12 @@
     </style>
 </head>
 
+
+    <div class="sidebar-bottom mb-5">
+
 <body>
 <div class="app-shell">
+
 
     <aside class="sidebar">
         <div class="sidebar-brand">
@@ -451,11 +601,27 @@
                 <span>Analytics</span>
             </a>
 
+
+    </div>
+    <div class="sidebar-user-profile mt-5" aria-label="Signed-in user">
+                    <div class="sidebar-user-avatar" aria-hidden="true">
+                        {{ sidebar_user_initial|default('U') }}
+                    </div>
+
+                    <div class="sidebar-user-details">
+                        <div class="sidebar-user-name">
+                            {{ sidebar_username|default('Signed-in user') }}
+                        </div>
+                        <div class="sidebar-user-status">Signed in</div>
+                    </div>
+                </div>
+
             <a href="/integrations" class="sidebar-link">
                 <i class="fa-solid fa-plug"></i>
                 <span>Integrations</span>
             </a>
         </div>
+
 
         <div class="sidebar-bottom">
             <a href="/settings" class="sidebar-link">
@@ -617,10 +783,18 @@
                             <div class="result-value" id="statusValue">—</div>
                         </div>
 
+
+
+                <section class="rag-section">
+                    <div class="rag-section-title">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        AI Operational Resolution
+
                         <div class="agent-result-item full-width">
                             <div class="result-label">Validation Message</div>
                             <div class="result-description" id="validationMessage">—</div>
                         </div>
+
                     </div>
                 </div>
             </section>
@@ -658,6 +832,65 @@
                     <div id="resolutionContainer" class="resolution-container">
                         <p class="resolution-text">No resolution generated.</p>
                     </div>
+
+                    <!-- Customer satisfaction -->
+                    <div id="rag-satisfaction" class="rag-satisfaction" hidden>
+                        <div class="rag-satisfaction-text">
+                            <div class="rag-satisfaction-title">
+                                <i class="fa-regular fa-face-smile me-1"></i>
+                                Was this AI resolution helpful?
+                            </div>
+
+                            <p class="rag-satisfaction-subtitle">
+                                Rate your experience from 1 (not helpful) to 5 (very helpful).
+                            </p>
+                        </div>
+
+                        <div class="rag-rating-buttons" aria-label="Satisfaction rating">
+                            <button type="button" data-rating="1" aria-label="Rate 1 out of 5">1</button>
+                            <button type="button" data-rating="2" aria-label="Rate 2 out of 5">2</button>
+                            <button type="button" data-rating="3" aria-label="Rate 3 out of 5">3</button>
+                            <button type="button" data-rating="4" aria-label="Rate 4 out of 5">4</button>
+                            <button type="button" data-rating="5" aria-label="Rate 5 out of 5">5</button>
+                        </div>
+
+                        <div id="rag-satisfaction-message"
+                            role="status"
+                            aria-live="polite"></div>
+                    </div>
+                    <div class="main-card mt-3 p-3">
+                        <h3 class="h6">Was the issue resolved?</h3>
+                        <p class="text-muted small">
+                            Confirm only after checking that the operational issue is actually resolved.
+                            Generating AI guidance does not count as resolution.
+                        </p>
+                        <div id="resolutionConfirmationMessage"
+                             class="small mb-3"
+                             role="status"
+                             aria-live="polite"></div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button"
+                                    id="confirmResolvedButton"
+                                    class="btn btn-success"
+                                    onclick="submitResolutionConfirmation(true)"
+                                    disabled>
+                                <i class="fa-solid fa-check me-1"></i>
+                                Yes, resolved
+                            </button>
+                            <button type="button"
+                                    id="confirmUnresolvedButton"
+                                    class="btn btn-outline-secondary"
+                                    onclick="submitResolutionConfirmation(false)"
+                                    disabled>
+                                Still unresolved
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+
+            </div>
+
                 </div>
             </section>
 
@@ -699,6 +932,7 @@
                     </details>
                 </div>
             </section>
+
         </section>
     </main>
 </div>
@@ -706,10 +940,68 @@
 <script>
 "use strict";
 
+
+let currentResolutionTicketId = null;
+
+async function submitResolutionConfirmation(confirmed) {
+    if (!currentResolutionTicketId) {
+        return;
+    }
+
+    const yesButton = document.getElementById("confirmResolvedButton");
+    const noButton = document.getElementById("confirmUnresolvedButton");
+    const message = document.getElementById("resolutionConfirmationMessage");
+
+    yesButton.disabled = true;
+    noButton.disabled = true;
+    message.textContent = "Saving confirmation...";
+
+    try {
+        const response = await fetch(
+            `/api/tickets/${encodeURIComponent(currentResolutionTicketId)}/resolution-confirmation`,
+            {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({confirmed: confirmed})
+            }
+        );
+
+        const data = await readJson(response);
+
+        if (!response.ok) {
+            throw new Error(data.error || "Unable to save resolution confirmation.");
+        }
+
+        message.textContent = confirmed
+            ? "Resolution confirmed and recorded."
+            : "Recorded as still unresolved.";
+
+        message.className = confirmed
+            ? "small mb-3 text-success"
+            : "small mb-3 text-secondary";
+    } catch (error) {
+        message.textContent = error.message || "Unable to save confirmation.";
+        message.className = "small mb-3 text-danger";
+    } finally {
+        yesButton.disabled = false;
+        noButton.disabled = false;
+    }
+}
+
+
+async function loadSelectedTicket() {
+    document.getElementById("confirmResolvedButton").disabled = true;
+    document.getElementById("confirmUnresolvedButton").disabled = true;
+    document.getElementById("resolutionConfirmationMessage").textContent = "";
+
+    const params = new URLSearchParams(window.location.search);
+    const ticketId = params.get("ticket_id");
+
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("agentForm");
     const runButton = document.getElementById("runButton");
     const descriptionInput = document.getElementById("ticketDescription");
+
 
     form.addEventListener("submit", runWorkflow);
 
@@ -776,6 +1068,22 @@ document.addEventListener("DOMContentLoaded", function () {
                 '<i class="fa-solid fa-play"></i> Run Multi-Agent Workflow';
         }
     }
+
+
+
+
+        displayTicket(data);
+
+        currentResolutionTicketId = data.ticket_id;
+
+        setWorkflow(2);
+
+        await runRag(ticketId);
+
+
+    } catch (error) {
+        console.error("Ticket loading error:", error);
+        showPageError(error.message || "Unable to load the selected ticket.");
 
     function renderResults(data) {
         const diagnosis = data.diagnosis || {};
@@ -920,6 +1228,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 ? "Escalation or human review is required."
                 : "Action selected: " + action
         );
+
     }
 
     function setStep(cardId, passed, textId, message) {
@@ -940,6 +1249,30 @@ document.addEventListener("DOMContentLoaded", function () {
         const container = document.getElementById("evidenceContainer");
         container.replaceChildren();
 
+
+        setWorkflow(4);
+
+        renderResolution(data.resolution, data.category);
+        showRagSatisfaction();
+
+
+        const noEvidenceMessage =
+            "No sufficiently relevant knowledge-base evidence was found for this ticket.";
+
+        const hasResolution =
+            typeof data.resolution === "string" &&
+            data.resolution.trim().length > 0 &&
+            !data.resolution.includes(noEvidenceMessage);
+
+        document.getElementById("confirmResolvedButton").disabled = !hasResolution;
+        document.getElementById("confirmUnresolvedButton").disabled = !hasResolution;
+
+
+        document.getElementById("workflowContainer").classList.add("workflow-complete");
+
+    } catch (error) {
+        console.error("RAG processing error:", error);
+
         if (!evidence.length) {
             container.appendChild(createEmptyState(
                 "No knowledge-base evidence was returned. Human review may be required."
@@ -950,6 +1283,7 @@ document.addEventListener("DOMContentLoaded", function () {
         evidence.forEach(function (item, index) {
             const card = document.createElement("article");
             card.className = "evidence-card";
+
 
             const heading = document.createElement("h3");
             heading.textContent =
@@ -965,12 +1299,37 @@ document.addEventListener("DOMContentLoaded", function () {
                 meta.appendChild(createBadge("Category: " + item.category));
             }
 
+
+function displayTicket(data) {
+    setText("ticketIdContainer", data.ticket_id);
+    setText("requesterContainer", data.requester_name || "Not provided");
+    setText("departmentContainer", data.department || "Not provided");
+    setText("titleContainer", data.title || "Untitled support ticket");
+    setText("descriptionContainer", data.description || "");
+    setText("categoryContainer", data.category || "Unknown");
+    setText("severityContainer", data.severity || "—");
+    setText("confidenceContainer", formatPercent(data.confidence));
+
+    // RAG page always displays OPEN.
+    // Escalation status is not handled in this view.
+    document.getElementById("statusContainer").innerHTML =
+        '<span class="status-badge">OPEN</span>';
+
+    if (data.priority) {
+        document.getElementById("priorityContainer").innerHTML =
+            '<span class="priority-badge">' +
+            escapeHtml(data.priority) +
+            '</span>';
+    }
+}
+
             if (item.kb_type) {
                 meta.appendChild(createBadge("Type: " + item.kb_type));
             }
 
             if (item.score !== undefined && item.score !== null) {
                 const score = Number(item.score);
+
 
                 meta.appendChild(createBadge(
                     "Relevance score: " +
@@ -1171,6 +1530,98 @@ if (typeof window.logout !== "function") {
         window.location.href = "/";
     };
 }
+function showRagSatisfaction() {
+    const panel = document.getElementById("rag-satisfaction");
+    const message = document.getElementById("rag-satisfaction-message");
+
+    panel.hidden = false;
+    message.textContent = "";
+
+    panel.querySelectorAll("button[data-rating]").forEach(button => {
+        button.disabled = false;
+    });
+}
+
+document.querySelectorAll(
+    "#rag-satisfaction button[data-rating]"
+).forEach(button => {
+    button.addEventListener("click", async () => {
+        const ticketId = new URLSearchParams(
+            window.location.search
+        ).get("ticket_id");
+
+        const panel = document.getElementById("rag-satisfaction");
+        const message = document.getElementById(
+            "rag-satisfaction-message"
+        );
+
+        if (!ticketId || !/^[1-9]\d*$/.test(ticketId)) {
+            message.textContent = "Missing or invalid ticket ID.";
+            return;
+        }
+
+        const rating = Number(button.dataset.rating);
+
+        panel.querySelectorAll("button[data-rating]").forEach(item => {
+            item.disabled = true;
+        });
+
+        message.textContent = "Saving your rating...";
+
+        try {
+            const response = await fetch(
+                `/api/tickets/${encodeURIComponent(ticketId)}/feedback`,
+                {
+                    method: "POST",
+                    credentials: "same-origin",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({ rating })
+                }
+            );
+
+            const responseText = await response.text();
+            let result;
+
+            try {
+                result = JSON.parse(responseText);
+            } catch {
+                throw new Error(
+                    `Server returned non-JSON (HTTP ${response.status}). ` +
+                    "Check the Flask terminal."
+                );
+            }
+
+            if (!response.ok) {
+                throw new Error(
+                    result.message || result.error ||
+                    `Rating request failed (HTTP ${response.status}).`
+                );
+            }
+
+            message.textContent = result.message;
+
+        } catch (error) {
+            message.textContent = error.message;
+
+            panel.querySelectorAll("button[data-rating]").forEach(item => {
+                item.disabled = false;
+            });
+        }
+    });
+});
+
+function logout() {
+    fetch("/logout", {
+        method: "POST",
+        credentials: "same-origin"
+    }).finally(() => {
+        window.location.replace("/login");
+    });
+}
+
 </script>
 
 </body>

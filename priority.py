@@ -50,8 +50,24 @@ LOW_IMPACT_TERMS = [
     "one scanner",
     "single scanner",
     "display issue",
+
+    "display-only issue",
+
+
     "slow",
     "configuration",
+    "maintenance reminder",
+    "maintenance status display",
+    "administrative inconvenience",
+    "administrative tracking",
+    "printer is working normally",
+    "printing tasks are not affected",
+    "no operational impact",
+    "no impact to operations",
+    "no interruption to operations",
+    "no disruption to service",
+    "no operational work is disrupted",
+    "status display corrected",
 ]
 
 
@@ -112,9 +128,11 @@ def should_escalate(query: str, confidence: float) -> bool:
         for term in ESCALATION_TERMS
     )
 
+
     # Escalate if classifier confidence is below 70%
     if confidence < 70:
         return True
+
 
     # Escalate broad operational incidents
     if broad_impact:

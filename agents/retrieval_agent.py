@@ -15,6 +15,7 @@ class RetrievalAgent:
                 "context": "",
                 "resolution": "",
                 "requires_escalation": True,
+                "agent": "Retrieval Agent",
                 "error": "Ticket description cannot be empty.",
             }
 
@@ -26,13 +27,14 @@ class RetrievalAgent:
                 generate_resolution=False,
             )
 
-            evidence = result.get("evidence", [])
+            evidence = result.get("evidence", []) or []
+            context = result.get("context", "")
 
             return {
                 "success": bool(evidence),
                 "evidence": evidence,
-                "context": result.get("context", ""),
-                "resolution": result.get("resolution", ""),
+                "context": context,
+                "resolution": "",
                 "requires_escalation": not bool(evidence),
                 "agent": "Retrieval Agent",
                 "message": (
@@ -52,7 +54,7 @@ class RetrievalAgent:
                 "agent": "Retrieval Agent",
                 "error": (
                     "Knowledge retrieval failed. "
-                    "Human review may be required."
+                    "Human support review may be required."
                 ),
             }
 
@@ -73,7 +75,7 @@ if __name__ == "__main__":
     print("Evidence found:", len(result["evidence"]))
     print("Requires escalation:", result["requires_escalation"])
     print("Agent:", result["agent"])
-    print("Message:", result["message"])
+    print("Message:", result.get("message", result.get("error", "")))
 
     for index, item in enumerate(result["evidence"], start=1):
         print(f"\nEvidence {index}:")

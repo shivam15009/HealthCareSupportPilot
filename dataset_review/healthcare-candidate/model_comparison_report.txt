@@ -1,0 +1,71 @@
+HEALTHCARE CLASSIFIER COMPARISON
+Evaluation tickets: 100
+Original training rows: 1024
+Candidate training rows: 1087
+
+Note: evaluation labels must be independently verified.
+This comparison uses the same fixed 100 tickets for both models.
+
+======================================================================
+ORIGINAL
+======================================================================
+Accuracy: 0.9900 (99.00%)
+Mean maximum predicted probability: 60.85%
+Median maximum predicted probability: 59.91%
+
+Per-category metrics:
+                      precision  recall  f1-score  support
+Appointment              1.0000  1.0000    1.0000    13.00
+Billing                  1.0000  1.0000    1.0000    13.00
+Equipment                1.0000  1.0000    1.0000     9.00
+Hospital Network         0.9286  1.0000    0.9630    13.00
+Laboratory               1.0000  1.0000    1.0000    13.00
+Patient Registration     1.0000  1.0000    1.0000    13.00
+Pharmacy                 1.0000  1.0000    1.0000    13.00
+Staff Authentication     1.0000  0.9231    0.9600    13.00
+accuracy                 0.9900  0.9900    0.9900     0.99
+macro avg                0.9911  0.9904    0.9904   100.00
+weighted avg             0.9907  0.9900    0.9900   100.00
+
+Confusion matrix (rows=actual, columns=predicted):
+Category order: ['Appointment', 'Billing', 'Equipment', 'Hospital Network', 'Laboratory', 'Patient Registration', 'Pharmacy', 'Staff Authentication']
+[[13  0  0  0  0  0  0  0]
+ [ 0 13  0  0  0  0  0  0]
+ [ 0  0  9  0  0  0  0  0]
+ [ 0  0  0 13  0  0  0  0]
+ [ 0  0  0  0 13  0  0  0]
+ [ 0  0  0  0  0 13  0  0]
+ [ 0  0  0  0  0  0 13  0]
+ [ 0  0  0  1  0  0  0 12]]
+
+======================================================================
+CANDIDATE
+======================================================================
+Accuracy: 0.9800 (98.00%)
+Mean maximum predicted probability: 61.28%
+Median maximum predicted probability: 62.10%
+
+Per-category metrics:
+                      precision  recall  f1-score  support
+Appointment              1.0000  1.0000    1.0000    13.00
+Billing                  1.0000  1.0000    1.0000    13.00
+Equipment                1.0000  0.8889    0.9412     9.00
+Hospital Network         0.8667  1.0000    0.9286    13.00
+Laboratory               1.0000  1.0000    1.0000    13.00
+Patient Registration     1.0000  1.0000    1.0000    13.00
+Pharmacy                 1.0000  1.0000    1.0000    13.00
+Staff Authentication     1.0000  0.9231    0.9600    13.00
+accuracy                 0.9800  0.9800    0.9800     0.98
+macro avg                0.9833  0.9765    0.9787   100.00
+weighted avg             0.9827  0.9800    0.9802   100.00
+
+Confusion matrix (rows=actual, columns=predicted):
+Category order: ['Appointment', 'Billing', 'Equipment', 'Hospital Network', 'Laboratory', 'Patient Registration', 'Pharmacy', 'Staff Authentication']
+[[13  0  0  0  0  0  0  0]
+ [ 0 13  0  0  0  0  0  0]
+ [ 0  0  8  1  0  0  0  0]
+ [ 0  0  0 13  0  0  0  0]
+ [ 0  0  0  0 13  0  0  0]
+ [ 0  0  0  0  0 13  0  0]
+ [ 0  0  0  0  0  0 13  0]
+ [ 0  0  0  1  0  0  0 12]]

@@ -104,7 +104,7 @@
 
             <!-- MILESTONE 2 -->
 
-            <a href="/rag" class="sidebar-link">
+            <a href="/agents" class="sidebar-link">
 
                 <i class="fa-solid fa-wand-magic-sparkles"></i>
 
@@ -142,7 +142,7 @@
 
         <!-- SIDEBAR BOTTOM -->
 
-        <div class="sidebar-bottom">
+        <div class="sidebar-bottom mb-5">
 
             <a href="/settings" class="sidebar-link">
 
@@ -166,6 +166,18 @@
             </a>
 
         </div>
+        <div class="sidebar-user-profile mt-5" aria-label="Signed-in user">
+                    <div class="sidebar-user-avatar" aria-hidden="true">
+                        {{ sidebar_user_initial|default('U') }}
+                    </div>
+
+                    <div class="sidebar-user-details">
+                        <div class="sidebar-user-name">
+                            {{ sidebar_username|default('Signed-in user') }}
+                        </div>
+                        <div class="sidebar-user-status">Signed in</div>
+                    </div>
+                </div>
 
     </aside>
 
@@ -558,9 +570,9 @@
                                     <div><strong><i class="fa-solid fa-laptop-medical"></i>&nbsp; Support</strong>
                                         <p>IT Â· Administration Â· Maintenance Network Â· Medical Equipment</p>
                                     </div>
-                                </div>
-                                <div class="card-header-custom py-0">
-                                    <h2>Operational Support Workflow</h2>
+                                </div><br>
+                                <div class="card-header-custom py-0 ">
+                                    <h2 class="">Operational Support Workflow</h2>
                                     <p>Milestone 1 ticket classification and operational prioritization.</p>
                                 </div>
                                 <div class="workflow-step">
@@ -1149,6 +1161,7 @@
                                  MILESTONE 2
                                  ================================================= -->
 
+
                             <div
                                 class="
                                     workflow
@@ -1353,12 +1366,13 @@
            =========================================================== */
 
         function logout() {
-
-            alert(
-                "Logout functionality will be connected when authentication is implemented."
-            );
-
-        }
+    fetch("/logout", {
+        method: "POST",
+        credentials: "same-origin"
+    }).finally(() => {
+        window.location.replace("/login");
+    });
+}
 
     </script>
 
