@@ -1,0 +1,89 @@
+# Secrets and local environment configuration
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local database and backups
+healthcare_support.db
+healthcare_support.db-*
+
+# Logs
+*.log
+# Local databases and backups
+*.db
+*.db-*
+db_backup_*/
+backups/
+
+# Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Temporary backup files
+*.bak
+*.backup*
+*.before_*
+
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.db
+*.db-*
+*.bak
+*.backup*
+
+test_experimental.py
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Databases
+*.db
+*.db-*
+db_backup_*/
+backups/
+
+# Logs
+*.log
+
+# Backups
+*.bak
+*.backup*
+*.before_*
+*.encoding-backup
+*.text-backup
+*.pre-*
+*.dashboard-backup
+
+# Local editor settings
+.vscode/
+
+# Old model and knowledge-base backups
+models/*before*.pkl
+models/*uncalibrated*.pkl
+data/*backup*.json
+data/*before*.json
+# Ignore all local SQLite databases
+*.db
+*.db-*
+healthcare_support_dataset_before_*.csv

@@ -1,0 +1,1076 @@
+﻿<!doctype html>
+
+
+
+<html lang="en">
+
+
+
+<head>
+
+
+
+    <meta charset="utf-8">
+
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+    <title>Healthcare Support Pilot | Dashboard</title>
+
+
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tickets.css') }}">
+
+
+
+    <style>
+
+
+
+        .dashboard-tabs { display:flex; gap:8px; margin-bottom:24px; }
+
+
+
+        .dashboard-tabs .sidebar-link { border:0; text-align:left; }
+
+
+
+        .dashboard-tabs .sidebar-link.active { background:#123d70; color:#fff; }
+
+
+
+        .dashboard-card { background:#fff; border:1px solid #e2e9ee; border-radius:14px; padding:22px; height:100%; }
+
+
+
+        .dashboard-card h2 { color:#233746; font-size:16px; font-weight:700; margin:0 0 18px; }
+
+
+
+        .kpi-label { color:#71808c; font-size:13px; }
+
+
+
+        .kpi-value { color:#123d70; font-size:32px; font-weight:800; margin-top:6px; }
+
+
+
+        .chart-wrap { height:300px; position:relative; }
+
+
+
+        .metric-card { position:relative; overflow:hidden; min-height:165px; }
+
+
+
+        .metric-icon { width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; color:#087f8c; background:#e8f5f5; margin-bottom:14px; }
+
+
+
+        .kpi-value { font-size:clamp(24px,2vw,32px); overflow-wrap:anywhere; }
+
+
+
+        .kpi-change { color:#71808c; font-size:12px; margin-top:8px; }
+
+
+
+        .system-metric { height:100%; padding:16px; border:1px solid #e7edf1; border-radius:12px; background:#fbfdff; }
+
+
+
+        .system-metric-label { color:#71808c; font-size:12px; margin-bottom:8px; }
+
+
+
+        .system-metric-value { color:#123d70; font-size:23px; font-weight:800; overflow-wrap:anywhere; }
+
+
+
+        .metric-note { color:#71808c; font-size:12px; margin-top:16px; }
+
+
+
+        .workflow-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+
+
+
+        .workflow-step { display:flex; align-items:flex-start; gap:13px; padding:16px; background:#fbfdff; border:1px solid #e7edf1; border-radius:12px; }
+
+
+
+        .workflow-number { display:flex; flex:0 0 34px; height:34px; align-items:center; justify-content:center; border-radius:50%; color:#fff; background:#123d70; font-weight:800; }
+
+
+
+        .workflow-step h3 { font-size:14px; color:#233746; font-weight:700; margin:2px 0 6px; }
+
+
+
+        .workflow-step p { font-size:13px; color:#71808c; margin:0; }
+
+
+
+        .ticket-count { background:#e8f5f5; color:#087f8c; border-radius:20px; padding:8px 13px; font-weight:800; font-size:13px; }
+
+
+
+        .ticket-table { font-size:13px; min-width:1200px; }
+
+
+
+        .ticket-table thead th { white-space:nowrap; color:#435661; background:#f6f9fb; font-size:12px; }
+
+
+
+        .priority-pill { display:inline-block; border-radius:20px; padding:4px 9px; background:#fff1f0; color:#a43232; font-weight:700; }
+
+
+
+        @media(max-width:767px) { .chart-wrap { height:250px; } .workflow-grid { grid-template-columns:1fr; } }
+
+
+
+        .rule-counter { align-items:center; border-bottom:1px solid #e7edf1; display:flex; justify-content:space-between; padding:16px 0; }
+
+
+
+        .rule-counter:last-child { border-bottom:0; }
+
+
+
+        .rule-counter-label { color:#435661; font-size:14px; }
+
+
+
+        .rule-counter-value { background:#fff1f0; border-radius:20px; color:#a43232; font-size:14px; font-weight:800; min-width:42px; padding:7px 12px; text-align:center; }
+
+
+
+        @media(max-width:767px) { .chart-wrap { height:250px; } }
+
+
+.sidebar-user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 10px 8px;
+    padding: 14px 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    min-width: 0;
+}
+
+.sidebar-user-avatar {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.16);
+    color: inherit;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.sidebar-user-details {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.sidebar-user-name {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: inherit;
+}
+
+.sidebar-user-status {
+    margin-top: 3px;
+    font-size: 11px;
+    opacity: 0.7;
+    color: inherit;
+}
+
+
+    </style>
+
+
+
+</head>
+
+
+
+<body>
+
+
+
+<div class="app-shell">
+
+
+
+    <!-- =========================================================
+
+
+
+     SIDEBAR
+
+
+
+     ========================================================= -->
+
+
+
+    <aside class="sidebar">
+
+
+
+        <!-- LOGO -->
+
+
+
+        <div class="sidebar-brand">
+
+
+
+            <a href="/dashboard" class="brand-link">
+
+
+
+                <div class="brand-logo">
+
+
+
+                    <img src="{{ url_for(
+
+
+
+                        'static',
+
+
+
+                        filename='images/healthcare-support-pilot.png'
+
+
+
+                    ) }}" alt="Healthcare Support Pilot">
+
+
+
+                </div>
+
+
+
+                <div class="brand-text">
+
+
+
+                    <div class="brand-title">
+
+
+
+                        HEALTHCARE
+
+
+
+                    </div>
+
+
+
+                    <div class="brand-title">
+
+
+
+                        SUPPORTPILOT
+
+
+
+                    </div>
+
+
+
+                </div>
+
+
+
+            </a>
+
+
+
+        </div>
+
+
+
+        <div class="sidebar-divider"></div>
+
+
+
+        <!-- WORKSPACE -->
+
+
+
+        <div class="nav-section">
+
+
+
+            <div class="nav-label">
+
+
+
+                WORKSPACE
+
+
+
+            </div>
+
+
+
+            <!-- DASHBOARD -->
+
+
+
+            <a href="/dashboard" class="sidebar-link{{ ' active' if request.path == '/dashboard' else '' }}">
+
+
+
+                <i class="fa-solid fa-chart-line"></i>
+
+
+
+                <span>
+
+
+
+                    Dashboard
+
+
+
+                </span>
+
+
+
+            </a>
+
+
+
+            <!-- TICKETS -->
+
+
+
+            <a href="/ticket" class="sidebar-link{{ ' active' if request.path == '/ticket' else '' }}">
+
+
+
+                <i class="fa-solid fa-ticket"></i>
+
+
+
+                <span>
+
+
+
+                    Tickets
+
+
+
+                </span>
+
+
+
+            </a>
+
+
+
+            <!-- MILESTONE 2 -->
+
+
+
+            <a href="/agents" class="sidebar-link{{ ' active' if request.path == '/rag' else '' }}">
+
+
+
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+
+
+
+                <span>
+
+
+
+                    AI Agents
+
+
+
+                </span>
+
+
+
+            </a>
+
+
+
+            <!-- ANALYTICS -->
+
+
+
+            <a href="/analytics" class="sidebar-link{{ ' active' if request.path == '/analytics' else '' }}">
+
+
+
+                <i class="fa-solid fa-chart-simple"></i>
+
+
+
+                <span>
+
+
+
+                    Analytics
+
+
+
+                </span>
+
+
+
+            </a>
+
+
+
+            <!-- INTEGRATIONS -->
+
+
+
+            <a href="/integrations" class="sidebar-link{{ ' active' if request.path == '/integrations' else '' }}">
+
+
+
+                <i class="fa-solid fa-plug"></i>
+
+
+
+                <span>
+
+
+
+                    Integrations
+
+
+
+                </span>
+
+
+
+            </a>
+
+
+
+        </div>
+
+
+
+        <!-- SIDEBAR BOTTOM -->
+
+
+
+        <div class="sidebar-bottom mb-5">
+
+
+
+            <a href="/settings" class="sidebar-link{{ ' active' if request.path == '/settings' else '' }}">
+
+
+
+                <i class="fa-solid fa-gear"></i>
+
+
+
+                <span>
+
+
+
+                    Settings
+
+
+
+                </span>
+
+
+
+            </a>
+
+
+
+            <a href="#" class="sidebar-link" onclick="logout(); return false;">
+
+
+
+                <i class="fa-solid fa-right-from-bracket"></i>
+
+
+
+                <span>
+
+
+
+                    Logout
+
+
+
+                </span>
+
+
+
+            </a>
+
+
+
+        </div>
+
+        <div class="sidebar-user-profile mt-5" aria-label="Signed-in user">
+                    <div class="sidebar-user-avatar" aria-hidden="true">
+                        {{ sidebar_user_initial|default('U') }}
+                    </div>
+
+                    <div class="sidebar-user-details">
+                        <div class="sidebar-user-name">
+                            {{ sidebar_username|default('Signed-in user') }}
+                        </div>
+                        <div class="sidebar-user-status">Signed in</div>
+                    </div>
+                </div>
+
+    </aside>
+
+
+
+    <main class="main">
+
+
+
+        <header class="topbar">
+
+
+
+            <div>
+
+
+
+                <h1 class="page-title">Support Dashboard</h1>
+
+
+
+                <div class="page-subtitle">Healthcare Support Pilot · Live ticket metrics</div>
+
+
+
+            </div>
+
+
+
+            <div class="system-status"><span class="status-dot"></span>System Online</div>
+
+
+
+        </header>
+
+
+
+        <div class="content">
+
+
+
+            <div class="tab-content">
+
+
+
+                <section id="dashboard-tab" class="tab-pane show active"
+
+
+
+                         role="tabpanel" tabindex="0">
+
+
+
+                    <div class="row g-3 mb-4">
+
+
+
+
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="dashboard-card metric-card">
+                        <div class="metric-icon"><i class="fa-solid fa-ticket"></i></div>
+                        <div class="kpi-label">Total Tickets</div>
+                        <div class="kpi-value">{{ total_tickets|default(0) }}</div>
+                        <div class="kpi-change">All recorded tickets</div>
+                    </div>
+                </div>
+
+
+
+
+    <div class="col-12 col-sm-6 col-xl-3"><div class="dashboard-card metric-card">
+
+
+
+        <div class="metric-icon"><i class="fa-solid fa-robot"></i></div><div class="kpi-label">AI-Resolved Ticket Rate</div>
+
+
+
+        <div class="kpi-value">{{ ai_resolution_rate|default(0)|round(1) }}%</div><div class="kpi-change">{{ ai_rate_change|default('—') }} vs yesterday</div>
+
+
+
+    </div></div>
+
+
+
+    <div class="col-12 col-sm-6 col-xl-3"><div class="dashboard-card metric-card">
+
+
+
+        <div class="metric-icon"><i class="fa-solid fa-clock"></i></div><div class="kpi-label">Avg. Resolution Time</div>
+
+
+
+        <div class="kpi-value">{{ avg_resolution_time|default('—') }}</div><div class="kpi-change">{{ resolution_time_change|default('—') }} vs yesterday</div>
+
+
+
+    </div></div>
+
+
+
+    <div class="col-12 col-sm-6 col-xl-3"><div class="dashboard-card metric-card">
+
+
+
+        <div class="metric-icon"><i class="fa-solid fa-face-smile"></i></div><div class="kpi-label">User Satisfaction</div>
+
+
+
+        <div class="kpi-value">{{ user_satisfaction|default('No ratings') }}</div><div class="kpi-change">{{ satisfaction_change|default('—') }} vs yesterday</div>
+
+
+
+    </div></div>
+
+
+<div class="col-12 col-sm-6 col-xl-3">
+    <div class="dashboard-card metric-card">
+        <div class="metric-icon"><i class="fa-solid fa-bullseye"></i></div>
+        <div class="kpi-label">Classification Accuracy</div>
+        <div class="kpi-value">{{ classification_accuracy|default('Not tracked') }}</div>
+        <div class="kpi-change">Requires measured test results</div>
+    </div>
+</div>
+
+<div class="col-12 col-sm-6 col-xl-3">
+    <div class="dashboard-card metric-card">
+        <div class="metric-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <div class="kpi-label">Verified Resolution Success Rate</div>
+        <div class="kpi-value">{{ resolution_success_rate|default(0) }}%</div>
+        <div class="kpi-change">Measured successful resolutions</div>
+    </div>
+</div>
+
+<div class="col-12 col-sm-6 col-xl-3">
+    <div class="dashboard-card metric-card">
+        <div class="metric-icon"><i class="fa-solid fa-book-medical"></i></div>
+        <div class="kpi-label">Knowledge Base Coverage</div>
+        <div class="kpi-value">{{ knowledge_base_coverage|default('Not tracked') }}</div>
+        <div class="kpi-change">Knowledge base metric</div>
+    </div>
+</div>
+
+<div class="col-12 col-sm-6 col-xl-3">
+    <div class="dashboard-card metric-card">
+        <div class="metric-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+        <div class="kpi-label">System Uptime</div>
+        <div class="kpi-value">{{ system_uptime|default('Not tracked') }}</div>
+        <div class="kpi-change">Uptime measurement</div>
+    </div>
+</div>
+
+<div class="col-12 col-sm-6 col-xl-3">
+    <div class="dashboard-card metric-card">
+        <div class="metric-icon"><i class="fa-solid fa-bolt"></i></div>
+        <div class="kpi-label">Average AI Latency</div>
+        <div class="kpi-value">{{ avg_response_generation_time|default('Not tracked') }}</div>
+        <div class="kpi-change">Resolution formatting time (ms)</div>
+    </div>
+</div>
+
+<div class="col-12 col-sm-6 col-xl-3">
+    <div class="dashboard-card metric-card">
+        <div class="metric-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div class="kpi-label">Escalation Rate</div>
+        <div class="kpi-value">{{ ((escalated_count / total_tickets * 100)|round(1)) if total_tickets else 0 }}%</div>
+        <div class="kpi-change">{{ escalated_count|default(0) }} escalated tickets</div>
+    </div>
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<section class="dashboard-card mb-4">
+
+
+
+
+
+<h2><i class="fa-solid fa-chart-area me-2"></i>Ticket Volume &amp; Resolution</h2>
+
+
+<script id="chart-labels-data" type="application/json">
+    {{ chart_labels | tojson }}
+</script>
+<script id="chart-values-data" type="application/json">
+    {{ chart_values | tojson }}
+</script>
+<script id="chart-resolved-values-data" type="application/json">
+    {{ chart_resolved_values | tojson }}
+</script>
+
+<div class="chart-wrap">
+    <canvas id="volume-chart" aria-label="Ticket volume for today"></canvas>
+</div>
+
+
+
+
+</section>
+
+
+<section class="dashboard-card mb-4">
+    <h2>Tickets by Category</h2>
+    <div class="chart-wrap">
+        <canvas id="category-chart" aria-label="Tickets grouped by category"></canvas>
+    </div>
+</section>
+
+
+<section class="dashboard-card mb-4">
+    <h2>Resolution Outcomes</h2>
+    <div class="chart-wrap">
+        <canvas id="outcomes-chart" aria-label="Ticket resolution outcomes"></canvas>
+    </div>
+</section>
+
+<script id="outcomes-labels-data" type="application/json">
+    {{ ['AI Resolved', 'Escalated', 'Other Tickets'] | tojson }}
+</script>
+<script id="outcomes-values-data" type="application/json">
+    {{ [resolved_count|default(0), escalated_count|default(0), [total_tickets|default(0) - resolved_count|default(0) - escalated_count|default(0), 0]|max] | tojson }}
+</script>
+
+
+<section class="dashboard-card mb-4">
+    <h2>Tickets by Priority</h2>
+    <div class="chart-wrap">
+        <canvas id="priority-chart" aria-label="Tickets grouped by priority"></canvas>
+    </div>
+</section>
+
+<section class="dashboard-card mb-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <div>
+            <h2 class="mb-1">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                Automatic Escalation
+            </h2>
+            <p class="text-muted mb-0">Tickets flagged for human support review</p>
+        </div>
+        <span class="ticket-count">
+            {{ all_tickets|default([])|selectattr('status', 'equalto', 'ESCALATE')|list|length }}
+            escalated tickets
+        </span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Ticket ID</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Escalation Reason</th>
+                    <th>Status</th>
+                    <th>Created At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket in all_tickets|default([]) if ticket.status == 'ESCALATE' %}
+                <tr>
+                    <td><a href="{{ url_for('rag_page', ticket_id=ticket.ticket_id) }}" class="text-decoration-none fw-bold">#{{ ticket.ticket_id }}</a></td>
+                    <td>{{ ticket.title|default('?')|truncate(55) }}</td>
+                    <td>{{ ticket.category|default('?') }}</td>
+                    <td><span class="priority-pill">{{ ticket.priority|default('?') }}</span></td>
+                    {% set raw_reasons = ticket.escalation_reasons|default('', true)|string %}
+                    {% set readable_reasons = raw_reasons|replace('[', '')|replace(']', '')|replace('"', '')|replace("'", '')|replace('_', ' ')|trim %}
+                    <td>
+                        {% if readable_reasons %}
+                            {{ readable_reasons|title|truncate(100) }}
+                        {% else %}
+                            No escalation reason recorded
+                        {% endif %}
+                    </td>
+                    <td><span class="badge text-bg-warning">{{ ticket.status }}</span></td>
+                    <td>{{ ticket.created_at|default('?') }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">
+                        <i class="fa-solid fa-circle-check me-2"></i>
+                        No tickets currently require escalation.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<script id="category-labels-data" type="application/json">
+    {{ category_labels | tojson }}
+</script>
+<script id="category-values-data" type="application/json">
+    {{ category_values | tojson }}
+</script>
+<script id="priority-labels-data" type="application/json">
+    {{ priority_labels | tojson }}
+</script>
+<script id="priority-values-data" type="application/json">
+    {{ priority_values | tojson }}
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+                </section>
+
+
+
+                </main>
+
+
+
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+    // Render ticket volume from real database records.
+    const volumeCanvas = document.getElementById("volume-chart");
+
+            if (volumeCanvas) {
+                const chartLabels = JSON.parse(
+            document.getElementById("chart-labels-data").textContent
+        );
+        const chartValues = JSON.parse(
+            document.getElementById("chart-values-data").textContent
+        );
+        const resolvedValues = JSON.parse(
+            document.getElementById("chart-resolved-values-data").textContent
+        );
+
+        new Chart(volumeCanvas, {
+            type: "line",
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    label: "Tickets created",
+                    data: chartValues,
+                    borderColor: "#4F46E5",
+                    backgroundColor: "rgba(79, 70, 229, 0.12)",
+                    pointBackgroundColor: "#4F46E5",
+                    borderWidth: 3,
+                    pointRadius: 4,
+                    tension: 0.3,
+                    fill: false
+                }, {
+                    label: "AI auto-resolved",
+                    data: resolvedValues,
+                    borderColor: "#10B981",
+                    backgroundColor: "rgba(16, 185, 129, 0.12)",
+                    pointBackgroundColor: "#10B981",
+                    borderWidth: 3,
+                    pointRadius: 4,
+                    tension: 0.3,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                }
+            }
+        }
+    );
+    }
+
+
+    function readChartData(elementId) {
+        const element = document.getElementById(elementId);
+        return element ? JSON.parse(element.textContent) : [];
+    }
+
+    function createBreakdownChart(canvasId, labelsId, valuesId, chartType) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+
+        const labels = readChartData(labelsId);
+        const values = readChartData(valuesId);
+
+        const palette = [
+            "#4F46E5", "#06B6D4", "#10B981", "#F59E0B",
+            "#EF4444", "#8B5CF6", "#EC4899", "#84CC16",
+            "#F97316", "#14B8A6"
+        ];
+
+        new Chart(canvas, {
+            type: chartType,
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Number of tickets",
+                    data: values,
+                    backgroundColor: labels.map((_, index) =>
+                        palette[index % palette.length]
+                    ),
+                    borderColor: labels.map((_, index) =>
+                        palette[index % palette.length]
+                    ),
+                    borderWidth: 1,
+                    borderRadius: chartType === "bar" ? 6 : 0,
+                    hoverOffset: chartType === "doughnut" ? 8 : 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: chartType === "doughnut",
+                        position: "bottom"
+                    }
+                },
+                scales: chartType === "bar" ? {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { precision: 0 }
+                    }
+                } : {}
+            }
+        });
+    }
+
+    createBreakdownChart(
+        "category-chart",
+        "category-labels-data",
+        "category-values-data",
+        "bar"
+    );
+
+    createBreakdownChart(
+        "priority-chart",
+        "priority-labels-data",
+        "priority-values-data",
+        "bar"
+    );
+
+
+    createBreakdownChart(
+        "outcomes-chart",
+        "outcomes-labels-data",
+        "outcomes-values-data",
+        "doughnut"
+    );
+
+
+
+
+    document.querySelectorAll(".dashboard-tab-link").forEach((tab) => {
+
+        tab.addEventListener("shown.bs.tab", (event) => {
+
+            const target = event.target.getAttribute("data-bs-target");
+
+            document.querySelectorAll(".dashboard-tab-link").forEach((link) => {
+
+                const active = link.getAttribute("data-bs-target") === target;
+
+                link.classList.toggle("active", active);
+
+                link.setAttribute("aria-selected", String(active));
+
+            });
+
+        });
+
+    });
+
+
+
+    function logout() {
+
+        fetch("/logout", { method: "POST", credentials: "same-origin" })
+
+            .finally(() => { window.location.href = "/login"; });
+
+    }
+
+</script>
+
+
+
+</body>
+
+
+
+</html>
+
+

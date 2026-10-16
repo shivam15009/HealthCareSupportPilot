@@ -21,6 +21,7 @@ Resolution format:
 3. Recommended Troubleshooting Steps
 4. Knowledge Sources
 """
+import time
 
 MIN_RELEVANCE = 0.30
 MAX_STEPS = 5
@@ -294,23 +295,30 @@ def generate_resolution(ticket_text, evidence, category=None):
 
 
 def generate_support_response(ticket_text, evidence, category=None):
-    """
-    Main generator interface.
+        """Main generator interface.
 
-    Returns:
-        {
-            "context": "...",
-            "resolution": "..."
+        Returns:
+            {
+                "context": "...",
+                "resolution": "...",
+                "generation_time_ms": 123.45
+            }
+        """
+        start_time = time.perf_counter()
+
+        context = build_context(ticket_text, evidence)
+        resolution = generate_resolution(
+            ticket_text=ticket_text,
+            evidence=evidence,
+            category=category,
+        )
+
+        generation_time_ms = (
+            time.perf_counter() - start_time
+        ) * 1000
+
+        return {
+            "context": context,
+            "resolution": resolution,
+            "generation_time_ms": round(generation_time_ms, 2),
         }
-    """
-    context = build_context(ticket_text, evidence)
-    resolution = generate_resolution(
-        ticket_text=ticket_text,
-        evidence=evidence,
-        category=category,
-    )
-
-    return {
-        "context": context,
-        "resolution": resolution,
-    }

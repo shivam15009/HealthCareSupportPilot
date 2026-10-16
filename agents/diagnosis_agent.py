@@ -3,13 +3,9 @@ from classifier import classify_query
 
 
 class DiagnosisAgent:
-    """Analyze a ticket using the existing classifier."""
+    """Classify an operational support ticket."""
 
     def run(self, ticket_text):
-        """
-        Return the predicted category and confidence.
-        """
-
         ticket_text = (ticket_text or "").strip()
 
         if not ticket_text:
@@ -17,6 +13,7 @@ class DiagnosisAgent:
                 "success": False,
                 "category": "Unknown",
                 "confidence": 0.0,
+                "agent": "Diagnosis Agent",
                 "error": "Ticket description cannot be empty.",
             }
 
@@ -31,23 +28,26 @@ class DiagnosisAgent:
             category = result.get("category", "Unknown")
             confidence = float(result.get("confidence", 0.0))
 
+            if not 0.0 <= confidence <= 100.0:
+                raise ValueError(
+                    "Confidence must be between 0 and 100."
+                )
+
+            if not category or category == "Unknown":
+                return {
+                    "success": False,
+                    "category": "Unknown",
+                    "confidence": confidence,
+                    "agent": "Diagnosis Agent",
+                    "error": "The ticket category could not be identified.",
+                }
+
             return {
                 "success": True,
                 "category": category,
                 "confidence": round(confidence, 2),
                 "agent": "Diagnosis Agent",
-                "message": (
-                    "Operational category identified."
-                ),
-            }
-
-        except (ValueError, TypeError, KeyError) as error:
-            return {
-                "success": False,
-                "category": "Unknown",
-                "confidence": 0.0,
-                "agent": "Diagnosis Agent",
-                "error": str(error),
+                "message": "Operational category identified.",
             }
 
         except Exception:
@@ -56,23 +56,19 @@ class DiagnosisAgent:
                 "category": "Unknown",
                 "confidence": 0.0,
                 "agent": "Diagnosis Agent",
-                "error": (
-                    "The classifier could not process this ticket."
-                ),
+                "error": "The classifier could not process this ticket.",
             }
 
 
 if __name__ == "__main__":
     agent = DiagnosisAgent()
 
-    sample_ticket = (
+    result = agent.run(
         "Hospital staff cannot connect to the internal network."
     )
-
-    result = agent.run(sample_ticket)
 
     print("\n--- Diagnosis Agent Result ---")
     print("Success:", result["success"])
     print("Category:", result["category"])
     print("Confidence:", result["confidence"], "%")
-    print("Agent:", result.get("agent", "Diagnosis Agent"))
+    print("Agent:", result["agent"])

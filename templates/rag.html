@@ -33,6 +33,117 @@
         .empty-evidence{border:1px dashed #d8e2e7;border-radius:12px;padding:20px;text-align:center;color:#71808c;font-size:13px}
         .workflow-complete .rag-step-number{background:#edf7f4;color:#26735f}
         @media(max-width:900px){.rag-workflow{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.rag-workflow,.ticket-detail-grid{grid-template-columns:1fr}.ticket-detail-item.full-width{grid-column:auto}}
+        /* Customer satisfaction rating */
+.rag-satisfaction {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 14px;
+    padding: 16px 18px;
+    background: #f5f8ff;
+    border: 1px solid #dbe5f5;
+    border-radius: 12px;
+}
+
+.rag-satisfaction[hidden] {
+    display: none;
+}
+
+.rag-satisfaction-text {
+    flex: 1;
+    min-width: 200px;
+}
+
+.rag-satisfaction-title {
+    color: #243b53;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.rag-satisfaction-subtitle {
+    color: #718096;
+    font-size: 12px;
+    margin: 0;
+}
+
+.rag-rating-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.rag-rating-buttons button {
+    width: 34px;
+    height: 34px;
+    border: 1px solid #c7d5e8;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #243b53;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.rag-rating-buttons button:hover {
+    background: #e0eaff;
+    border-color: #6488cc;
+}
+
+.rag-rating-buttons button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+#rag-satisfaction-message {
+    width: 100%;
+    font-size: 12px;
+    color: #43546b;
+}
+
+
+.sidebar-user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 10px 8px;
+    padding: 14px 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    min-width: 0;
+}
+
+.sidebar-user-avatar {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.16);
+    color: inherit;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.sidebar-user-details {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.sidebar-user-name {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: inherit;
+}
+
+.sidebar-user-status {
+    margin-top: 3px;
+    font-size: 11px;
+    opacity: 0.7;
+    color: inherit;
+}
+
     </style>
 </head>
 
@@ -127,7 +238,7 @@
         <!-- MILESTONE 2 -->
 
         <a
-            href="/rag"
+            href="/agents"
             class="sidebar-link"
         >
 
@@ -176,7 +287,7 @@
 
     <!-- SIDEBAR BOTTOM -->
 
-    <div class="sidebar-bottom">
+    <div class="sidebar-bottom mb-5">
 
         <a
             href="/settings"
@@ -207,6 +318,18 @@
         </a>
 
     </div>
+    <div class="sidebar-user-profile mt-5" aria-label="Signed-in user">
+                    <div class="sidebar-user-avatar" aria-hidden="true">
+                        {{ sidebar_user_initial|default('U') }}
+                    </div>
+
+                    <div class="sidebar-user-details">
+                        <div class="sidebar-user-name">
+                            {{ sidebar_username|default('Signed-in user') }}
+                        </div>
+                        <div class="sidebar-user-status">Signed in</div>
+                    </div>
+                </div>
 
 </aside>
 
@@ -321,6 +444,7 @@
                     <pre id="contextContainer" class="context-container">Waiting for retrieved knowledge...</pre>
                 </section>
 
+
                 <section class="rag-section">
                     <div class="rag-section-title">
                         <i class="fa-solid fa-wand-magic-sparkles"></i>
@@ -329,7 +453,61 @@
                     <div id="resolutionContainer" class="resolution-container">
                         <div class="loading-box"><i class="fa-solid fa-spinner fa-spin"></i> Waiting for RAG processing...</div>
                     </div>
+                    <!-- Customer satisfaction -->
+                    <div id="rag-satisfaction" class="rag-satisfaction" hidden>
+                        <div class="rag-satisfaction-text">
+                            <div class="rag-satisfaction-title">
+                                <i class="fa-regular fa-face-smile me-1"></i>
+                                Was this AI resolution helpful?
+                            </div>
+
+                            <p class="rag-satisfaction-subtitle">
+                                Rate your experience from 1 (not helpful) to 5 (very helpful).
+                            </p>
+                        </div>
+
+                        <div class="rag-rating-buttons" aria-label="Satisfaction rating">
+                            <button type="button" data-rating="1" aria-label="Rate 1 out of 5">1</button>
+                            <button type="button" data-rating="2" aria-label="Rate 2 out of 5">2</button>
+                            <button type="button" data-rating="3" aria-label="Rate 3 out of 5">3</button>
+                            <button type="button" data-rating="4" aria-label="Rate 4 out of 5">4</button>
+                            <button type="button" data-rating="5" aria-label="Rate 5 out of 5">5</button>
+                        </div>
+
+                        <div id="rag-satisfaction-message"
+                            role="status"
+                            aria-live="polite"></div>
+                    </div>
+                    <div class="main-card mt-3 p-3">
+                        <h3 class="h6">Was the issue resolved?</h3>
+                        <p class="text-muted small">
+                            Confirm only after checking that the operational issue is actually resolved.
+                            Generating AI guidance does not count as resolution.
+                        </p>
+                        <div id="resolutionConfirmationMessage"
+                             class="small mb-3"
+                             role="status"
+                             aria-live="polite"></div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button"
+                                    id="confirmResolvedButton"
+                                    class="btn btn-success"
+                                    onclick="submitResolutionConfirmation(true)"
+                                    disabled>
+                                <i class="fa-solid fa-check me-1"></i>
+                                Yes, resolved
+                            </button>
+                            <button type="button"
+                                    id="confirmUnresolvedButton"
+                                    class="btn btn-outline-secondary"
+                                    onclick="submitResolutionConfirmation(false)"
+                                    disabled>
+                                Still unresolved
+                            </button>
+                        </div>
+                    </div>
                 </section>
+
 
             </div>
         </section>
@@ -339,7 +517,59 @@
 <script>
 document.addEventListener("DOMContentLoaded", loadSelectedTicket);
 
+let currentResolutionTicketId = null;
+
+async function submitResolutionConfirmation(confirmed) {
+    if (!currentResolutionTicketId) {
+        return;
+    }
+
+    const yesButton = document.getElementById("confirmResolvedButton");
+    const noButton = document.getElementById("confirmUnresolvedButton");
+    const message = document.getElementById("resolutionConfirmationMessage");
+
+    yesButton.disabled = true;
+    noButton.disabled = true;
+    message.textContent = "Saving confirmation...";
+
+    try {
+        const response = await fetch(
+            `/api/tickets/${encodeURIComponent(currentResolutionTicketId)}/resolution-confirmation`,
+            {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({confirmed: confirmed})
+            }
+        );
+
+        const data = await readJson(response);
+
+        if (!response.ok) {
+            throw new Error(data.error || "Unable to save resolution confirmation.");
+        }
+
+        message.textContent = confirmed
+            ? "Resolution confirmed and recorded."
+            : "Recorded as still unresolved.";
+
+        message.className = confirmed
+            ? "small mb-3 text-success"
+            : "small mb-3 text-secondary";
+    } catch (error) {
+        message.textContent = error.message || "Unable to save confirmation.";
+        message.className = "small mb-3 text-danger";
+    } finally {
+        yesButton.disabled = false;
+        noButton.disabled = false;
+    }
+}
+
+
 async function loadSelectedTicket() {
+    document.getElementById("confirmResolvedButton").disabled = true;
+    document.getElementById("confirmUnresolvedButton").disabled = true;
+    document.getElementById("resolutionConfirmationMessage").textContent = "";
+
     const params = new URLSearchParams(window.location.search);
     const ticketId = params.get("ticket_id");
 
@@ -363,10 +593,17 @@ async function loadSelectedTicket() {
             throw new Error(data.error || "Unable to load the selected ticket.");
         }
 
+
+
         displayTicket(data);
+
+        currentResolutionTicketId = data.ticket_id;
+
         setWorkflow(2);
 
         await runRag(ticketId);
+
+
     } catch (error) {
         console.error("Ticket loading error:", error);
         showPageError(error.message || "Unable to load the selected ticket.");
@@ -405,9 +642,25 @@ async function runRag(ticketId) {
             data.context || "No augmented context was generated.";
 
         setWorkflow(4);
+
         renderResolution(data.resolution, data.category);
+        showRagSatisfaction();
+
+
+        const noEvidenceMessage =
+            "No sufficiently relevant knowledge-base evidence was found for this ticket.";
+
+        const hasResolution =
+            typeof data.resolution === "string" &&
+            data.resolution.trim().length > 0 &&
+            !data.resolution.includes(noEvidenceMessage);
+
+        document.getElementById("confirmResolvedButton").disabled = !hasResolution;
+        document.getElementById("confirmUnresolvedButton").disabled = !hasResolution;
+
 
         document.getElementById("workflowContainer").classList.add("workflow-complete");
+
     } catch (error) {
         console.error("RAG processing error:", error);
 
@@ -441,14 +694,16 @@ function displayTicket(data) {
     setText("severityContainer", data.severity || "—");
     setText("confidenceContainer", formatPercent(data.confidence));
 
-    if (data.status) {
-        document.getElementById("statusContainer").innerHTML =
-            '<span class="status-badge">' + escapeHtml(data.status) + '</span>';
-    }
+    // RAG page always displays OPEN.
+    // Escalation status is not handled in this view.
+    document.getElementById("statusContainer").innerHTML =
+        '<span class="status-badge">OPEN</span>';
 
     if (data.priority) {
         document.getElementById("priorityContainer").innerHTML =
-            '<span class="priority-badge">' + escapeHtml(data.priority) + '</span>';
+            '<span class="priority-badge">' +
+            escapeHtml(data.priority) +
+            '</span>';
     }
 }
 
@@ -656,6 +911,98 @@ function escapeHtml(value) {
 function escapeAttribute(value) {
     return escapeHtml(value).replace(/`/g, "&#096;");
 }
+function showRagSatisfaction() {
+    const panel = document.getElementById("rag-satisfaction");
+    const message = document.getElementById("rag-satisfaction-message");
+
+    panel.hidden = false;
+    message.textContent = "";
+
+    panel.querySelectorAll("button[data-rating]").forEach(button => {
+        button.disabled = false;
+    });
+}
+
+document.querySelectorAll(
+    "#rag-satisfaction button[data-rating]"
+).forEach(button => {
+    button.addEventListener("click", async () => {
+        const ticketId = new URLSearchParams(
+            window.location.search
+        ).get("ticket_id");
+
+        const panel = document.getElementById("rag-satisfaction");
+        const message = document.getElementById(
+            "rag-satisfaction-message"
+        );
+
+        if (!ticketId || !/^[1-9]\d*$/.test(ticketId)) {
+            message.textContent = "Missing or invalid ticket ID.";
+            return;
+        }
+
+        const rating = Number(button.dataset.rating);
+
+        panel.querySelectorAll("button[data-rating]").forEach(item => {
+            item.disabled = true;
+        });
+
+        message.textContent = "Saving your rating...";
+
+        try {
+            const response = await fetch(
+                `/api/tickets/${encodeURIComponent(ticketId)}/feedback`,
+                {
+                    method: "POST",
+                    credentials: "same-origin",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({ rating })
+                }
+            );
+
+            const responseText = await response.text();
+            let result;
+
+            try {
+                result = JSON.parse(responseText);
+            } catch {
+                throw new Error(
+                    `Server returned non-JSON (HTTP ${response.status}). ` +
+                    "Check the Flask terminal."
+                );
+            }
+
+            if (!response.ok) {
+                throw new Error(
+                    result.message || result.error ||
+                    `Rating request failed (HTTP ${response.status}).`
+                );
+            }
+
+            message.textContent = result.message;
+
+        } catch (error) {
+            message.textContent = error.message;
+
+            panel.querySelectorAll("button[data-rating]").forEach(item => {
+                item.disabled = false;
+            });
+        }
+    });
+});
+
+function logout() {
+    fetch("/logout", {
+        method: "POST",
+        credentials: "same-origin"
+    }).finally(() => {
+        window.location.replace("/login");
+    });
+}
+
 </script>
 
 </body>
